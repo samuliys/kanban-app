@@ -1,0 +1,5 @@
+1-3 rivin kuvaus, mitä luokkia on lisätty tai päivitetty ja mitä toimintoja niissä on saatu toteutettua (vaikka olisi keskenkin).
+Mitä metodeja / toiminnallisuuksia on saatu testattua ko. luokissa, niin että ne toimivat oikein?
+Mitä mahdollisia hankalia virheitä on esiintynyt ja onko niitä saatu ratkaistua?
+Mikä on käytetty työmäärä tänä aikana noin 5 tunnin tarkkuudella.
+Oletko tässä vaiheessa (suurin piirtein) edellä vai jäljessä projektisuunnitelmassa arvioimaasi tilannetta.
