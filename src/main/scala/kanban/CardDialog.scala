@@ -1,7 +1,7 @@
 package kanban
 
 import javafx.scene.paint.Color
-import kanban.Main.{kanbanApp, stage}
+import kanban.Main.{activeCard, editActive, kanbanApp, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.geometry.Insets
@@ -15,6 +15,7 @@ object CardDialog {
   val dialog = new Dialog[Card]() {
     initOwner(stage)
     title = "Create new card"
+
     headerText = "Create new card using options below"
   }
 
@@ -57,10 +58,22 @@ object CardDialog {
     cardColor.value = Color.BLUE
   }
 
+  def setCardEdit(card: Card) = {
+    dialog.headerText = "edit"
+    cardText.text = card.getText
+    cardColor.value = card.getColor
+  }
+
   dialog.resultConverter = dialogButton =>
     if (dialogButton == okButtonType) {
-      kanbanApp.getActiveColumn.addCard(cardText.text(), cardColor.getValue)
-      new Card(cardText.text(), cardColor.getValue)
+      if (editActive) {
+        activeCard.editCard(cardText.text(), cardColor.getValue)
+        new Card(cardText.text(), cardColor.getValue)
+      } else {
+        kanbanApp.getActiveColumn.addCard(cardText.text(), cardColor.getValue)
+        new Card(cardText.text(), cardColor.getValue)
+      }
+
     } else
       null
 }
