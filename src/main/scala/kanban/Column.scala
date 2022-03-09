@@ -22,6 +22,10 @@ class Column(private var name: String, private var color: Color) {
     cards += card
   }
 
+  def deleteCard(card: Card) = {
+    cards.remove(cards.indexOf(card))
+  }
+
   def editColumn(newName: String, newColor: Color) = {
     name = newName
     color = newColor
