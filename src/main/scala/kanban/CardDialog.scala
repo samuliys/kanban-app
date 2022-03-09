@@ -1,6 +1,5 @@
 package kanban
 
-import javafx.scene.paint.Color
 import kanban.Main.{activeCard, cardEditActive, kanbanApp, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -8,6 +7,7 @@ import scalafx.geometry.Insets
 import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.layout._
 import scalafx.scene.control._
+import scalafx.scene.paint.Color
 
 
 object CardDialog {
@@ -26,7 +26,7 @@ object CardDialog {
     promptText = "Card Text"
     minWidth = 200
   }
-  val cardColor = new ColorPicker(Color.BLUE) {
+  val cardColor = new ColorPicker(Color.Black) {
     promptText = "Color"
 
   }
@@ -57,7 +57,7 @@ object CardDialog {
     dialog.title = "Kanban - new card"
     dialog.headerText = "Add new card"
     cardText.text = ""
-    cardColor.value = Color.BLUE
+    cardColor.value = Color.Black
   }
 
   def setCardEdit(card: Card) = {

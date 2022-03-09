@@ -1,6 +1,6 @@
 package kanban
 
-import javafx.scene.paint.Color
+import scalafx.scene.paint.Color
 import kanban.Main.{columnEditActive, kanbanApp, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -26,7 +26,7 @@ object ColumnDialog {
     minWidth = 200
   }
 
-  val columnColor = new ColorPicker(Color.BLUE) {
+  val columnColor = new ColorPicker(Color.Black) {
     promptText = "Color"
   }
 
@@ -56,7 +56,7 @@ object ColumnDialog {
     dialog.title = "Kanban - new column"
     dialog.headerText = "Add new column"
     columnName.text = ""
-    columnColor.value = Color.BLUE
+    columnColor.value = Color.Black
   }
 
   def setColumnEdit(column: Column) = {
