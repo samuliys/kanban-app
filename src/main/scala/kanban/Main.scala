@@ -45,10 +45,18 @@ object Main extends JFXApp {
     }
   }
 
+  def drawColumn(column: Column): VBox = new VBox(8) {
+    for (card <- column.getCards) {
+      children += drawCard(card)
+    }
+  }
+
   def root: VBox = new VBox(8) {
 
-    for (card <- kanbanApp.getBoards.getColumns.head.getCards) {
-      children += drawCard(card)
+    children += new HBox(8) {
+      for (column <- kanbanApp.getBoards.getColumns) {
+        children += drawColumn(column)
+      }
     }
   }
 
