@@ -35,6 +35,14 @@ object Main extends JFXApp {
       textAlignment = TextAlignment.Center
       font = Font.font("arial", 16)
     }
+
+    if (activeCard == card) {
+      children += new Label("This card is active")
+    }
+    onMouseClicked = (event) => {
+      activeCard = card
+      stage.scene = new Scene(root)
+    }
   }
 
   def root: VBox = new VBox(8) {
