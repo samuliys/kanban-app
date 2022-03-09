@@ -144,6 +144,17 @@ object Main extends JFXApp {
 
   def root: VBox = new VBox(8) {
 
+    children += new MenuBar {
+      menus += new Menu("File") {
+        items += new MenuItem("Open")
+        items += new MenuItem("Save")
+        items += new SeparatorMenuItem
+        items += new MenuItem("Exit") {
+          onAction = (event) => sys.exit(0)
+        }
+      }
+    }
+
     children += new HBox(14) {
       alignment = CenterLeft
       for (column <- kanbanApp.getBoards.getColumns) {
