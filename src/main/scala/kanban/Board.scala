@@ -8,7 +8,7 @@ import scala.collection.mutable.Buffer
 class Board(private var name: String) {
   private val columns = Buffer[Column]()
   this.addColumn("Column1", Color.OrangeRed)
-  this.addColumn("Test2", Color.SeaGreen)
+  this.addColumn("Column2", Color.SeaGreen)
 
   def getColumns = this.columns
   def getName = name
@@ -18,5 +18,9 @@ class Board(private var name: String) {
   def addColumn(name: String = "untitled", color: Color = Color.Blue) = {
     val column = new Column(name, color)
     columns += column
+  }
+
+  def deleteColumn(column: Column) = {
+    columns.remove(columns.indexOf(column))
   }
 }

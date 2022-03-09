@@ -7,7 +7,6 @@ import scalafx.scene.Scene
 import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.text._
-import scalafx.geometry.Insets
 import scalafx.scene.control.Alert.AlertType
 
 
@@ -25,6 +24,8 @@ object Main extends JFXApp {
 
   var activeCard = kanbanApp.getBoards.getColumns.head.getCards.head
   var cardActiveStatus = true
+
+  var activeBoard = kanbanApp.getBoards
 
   val fontChoice = Font.font("arial", 16)
 
@@ -82,7 +83,7 @@ object Main extends JFXApp {
     }
   }
 
-  def drawColumn(column: Column): VBox = new VBox(8) {
+  def drawColumn(board: Board, column: Column): VBox = new VBox(8) {
     alignment = TopCenter
     minHeight = stage.height.value
     minWidth = 280
@@ -93,7 +94,7 @@ object Main extends JFXApp {
     }
     children += new HBox(10) {
       alignment = Center
-      children += new Button("Add new card") {
+      children += new Button("New Card") {
         font = fontChoice
 
         onAction = (event) => {
@@ -103,7 +104,7 @@ object Main extends JFXApp {
           stage.scene = new Scene(root)
         }
       }
-      children += new Button("Edit Column") {
+      children += new Button("Edit") {
         font = fontChoice
 
         onAction = (event) => {
@@ -113,8 +114,25 @@ object Main extends JFXApp {
           val result = ColumnDialog.dialog.showAndWait()
           stage.scene = new Scene(root)
           columnEditActive = false
+        }
+      }
+      children += new Button("Delete") {
+        font = fontChoice
+        onAction = (event) => {
+          val alert = new Alert(AlertType.Confirmation) {
+            initOwner(stage)
+            title = "Delete Column"
+            contentText = "Are you sure you want to delete the column?"
+          }
 
-
+          val result = alert.showAndWait()
+          result match {
+            case Some(ButtonType.OK) => {
+              board.deleteColumn(column)
+              stage.scene = new Scene(root)
+            }
+            case _ =>
+          }
         }
       }
     }
@@ -129,7 +147,7 @@ object Main extends JFXApp {
     children += new HBox(14) {
       alignment = CenterLeft
       for (column <- kanbanApp.getBoards.getColumns) {
-        children += drawColumn(column)
+        children += drawColumn(activeBoard, column)
       }
       children += new Button("New Column") {
         font = fontChoice
