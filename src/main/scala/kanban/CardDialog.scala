@@ -1,6 +1,6 @@
 package kanban
 
-import kanban.Main.{activeCard, activeColumn, cardEditActive, kanbanApp, stage}
+import kanban.Main.{activeCard, activeColumn, cardEditActive, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.geometry.Insets
@@ -14,9 +14,8 @@ object CardDialog {
 
   val dialog = new Dialog[Card]() {
     initOwner(stage)
-    title = "Create new card"
-
-    headerText = "Create new card using options below"
+    title = "Kanban - New Card"
+    headerText = "Add New Card"
   }
 
   val okButtonType = new ButtonType("OK", ButtonData.OKDone)
@@ -54,16 +53,16 @@ object CardDialog {
   Platform.runLater(cardText.requestFocus())
 
   def reset() = {
-    dialog.title = "Kanban - new card"
-    dialog.headerText = "Add new card"
+    dialog.title = "Kanban - New Card"
+    dialog.headerText = "Add New Card"
     cardText.text = ""
     cardColor.value = Color.Black
   }
 
   def setCardEdit(card: Card) = {
     reset()
-    dialog.title = "Kanban - card edit"
-    dialog.headerText = "Edit card"
+    dialog.title = "Kanban - Card Edit"
+    dialog.headerText = "Edit Card"
     cardText.text = card.getText
     cardColor.value = card.getColor
   }
