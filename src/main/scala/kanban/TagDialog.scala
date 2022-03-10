@@ -56,6 +56,10 @@ object TagDialog {
       tagRemoveMenu.items = ObservableBuffer(getTagList)
       tagRemoveMenu.promptText = "Select Tag to Remove"
       disable = true
+      if (!getTagList.contains(tagText.text())) {
+        errorLabel.text = ""
+        addTagButton.disable = false
+      }
     }
   }
 
@@ -85,7 +89,7 @@ object TagDialog {
       errorLabel.text = "Tag name too long"
       addTagButton.disable = true
     } else if (getTagList.contains(newValue)) {
-      errorLabel.text = "Tag name can't be samuli"
+      errorLabel.text = "Tag \"" + tagText.text() + "\" already exits"
       addTagButton.disable = true
     } else {
       errorLabel.text = ""
