@@ -116,6 +116,13 @@ object CardDialog {
           TagDialog.reset()
           TagDialog.dialog.showAndWait()
           drawAddTag.items = drawAddTagMenuItems
+          if (cardEditActive) {
+            cardTags = activeCard.getTagNames
+          } else {
+            cardTags = cardTags.filter(kanbanApp.getTagNames.contains(_))
+          }
+          drawRemoveTag.items = drawRemoveTagMenuItems
+          drawCurrentTags.text = cardTags.mkString(", ")
         }
       }
     }
