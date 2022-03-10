@@ -41,6 +41,8 @@ object Main extends JFXApp {
   val cardSizeWidth = 250
   val cardSizeHeight = 100
 
+  val currentFilter = Buffer[Tag]()
+
   def drawAlert(alertTitle: String, content: String): Alert = {
     new Alert(AlertType.Confirmation) {
       initOwner(stage)
@@ -209,7 +211,11 @@ object Main extends JFXApp {
       val pane = getPane(column, 20)
       panes(column) += pane.toString()
       children += pane
-      children += drawCard(column, card)
+      //children += drawCard(column, card)
+      if (currentFilter.forall(card.getTags.contains(_))) {
+        children += drawCard(column, card)
+      }
+
 
     }
     val pane = getPane(column, 50)
@@ -217,7 +223,7 @@ object Main extends JFXApp {
     children += pane
   }
 
-  val toolbar = new ToolBar{
+  def toolbar = new ToolBar{
     items += new Button("New Board") {
       font = fontChoice
     }
@@ -227,12 +233,34 @@ object Main extends JFXApp {
     items += new Separator
     items += new MenuButton("Filter") {
       font = fontChoice
-      items += new MenuItem("Reset")
+      items += new MenuItem("Reset") {
+        onAction = (event) => {
+          currentFilter.clear()
+          update()
+        }
+      }
+      items += new SeparatorMenuItem
+      for (tag <- kanbanApp.getTagNames) {
+        items += new MenuItem(tag) {
+          onAction = (event) => {
+            val thisTag = kanbanApp.getTag(tag)
+            if (currentFilter.contains(thisTag)) {
+              currentFilter.remove(currentFilter.indexOf(thisTag))
+            } else {
+              currentFilter += thisTag
+            }
+            update()
+            println(currentFilter)
+          }
+        }
+      }
     }
     items += new Button("Manage Tags") {
       font = fontChoice
       onAction = (event) => {
+        TagDialog.reset()
         TagDialog.dialog.showAndWait()
+        update()
       }
     }
     items += new Separator

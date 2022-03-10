@@ -9,4 +9,6 @@ class Tag(private val name: String) {
   def removeCard(card: Card) = cards.remove(cards.indexOf(card))
 
   def getTagCards = cards
+
+  def getName = name
 }
