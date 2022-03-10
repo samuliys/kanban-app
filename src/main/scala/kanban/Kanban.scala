@@ -17,7 +17,7 @@ class Kanban(var name: String = "untitled") {
   def getBoards = this.boards.head
 
   def getTags = tags.values
-  def getTagNames = tags.keys
+  def getTagNames = tags.keys.toBuffer
   def getTag(name: String) = tags(name)
 
   def createBoard(name: String = "untitled") = {
@@ -26,5 +26,9 @@ class Kanban(var name: String = "untitled") {
   }
 
   def addTag(name: String) = tags(name) = new Tag(name)
-  def removeTag(name: String) = tags -= name
+  def removeTag(name: String) = {
+    val tag = tags(name)
+    tag.getTagCards.foreach(_.removeTag(tag))
+    tags -= name
+  }
 }
