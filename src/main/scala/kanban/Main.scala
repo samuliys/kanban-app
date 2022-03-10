@@ -114,7 +114,7 @@ object Main extends JFXApp {
         println(event.getPickResult.getIntersectedNode.toString)
         println(panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString))
         val index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
-        if (cardMoveActive) {
+        if (cardMoveActive && index != -1) {
           kanbanApp.getActiveColumn.deleteCard(activeCard)
           column.addCard(activeCard.getText, activeCard.getColor, index)
           stage.scene = new Scene(root)
