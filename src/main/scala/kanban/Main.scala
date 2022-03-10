@@ -31,6 +31,8 @@ object Main extends JFXApp {
 
   var activeBoard = kanbanApp.getBoards
 
+  var activeColumn = kanbanApp.getBoards.getColumns.head
+
   var cardMoveActive = false
 
 
@@ -95,7 +97,7 @@ object Main extends JFXApp {
         cardMoveActive = false
       } else {
         activeCard = card
-        kanbanApp.setActiveColumn(column)
+        activeColumn = column
         cardMoveActive = true
       }
 
@@ -113,9 +115,12 @@ object Main extends JFXApp {
         println(panes)
         println(event.getPickResult.getIntersectedNode.toString)
         println(panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString))
-        val index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
+        var index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
         if (cardMoveActive && index != -1) {
-          kanbanApp.getActiveColumn.deleteCard(activeCard)
+          if (activeColumn == column && column.getCards.indexOf(activeCard) < index) {
+            index = index - 1
+          }
+          activeColumn.deleteCard(activeCard)
           column.addCard(activeCard.getText, activeCard.getColor, index)
           stage.scene = new Scene(root)
           cardMoveActive = false
@@ -139,7 +144,7 @@ object Main extends JFXApp {
         font = fontChoice
 
         onAction = (event) => {
-          kanbanApp.setActiveColumn(column)
+          activeColumn = column
           CardDialog.reset()
           val result = CardDialog.dialog.showAndWait()
           stage.scene = new Scene(root)
@@ -149,7 +154,7 @@ object Main extends JFXApp {
         font = fontChoice
 
         onAction = (event) => {
-          kanbanApp.setActiveColumn(column)
+          activeColumn = column
           columnEditActive = true
           ColumnDialog.setColumnEdit(column)
           val result = ColumnDialog.dialog.showAndWait()
