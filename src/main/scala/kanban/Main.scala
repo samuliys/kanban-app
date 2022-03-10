@@ -8,6 +8,8 @@ import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.text._
 import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.paint.Color
+import scala.collection.mutable.{Buffer, Map}
 
 
 object Main extends JFXApp {
@@ -19,18 +21,28 @@ object Main extends JFXApp {
   var cardEditActive = false
   var columnEditActive = false
 
-  val kanbanApp = new Kanban()
-  val fileManager = new FileHandler
+  val panes = Map[Column, Buffer[String]]()
 
-  var activeCard = kanbanApp.getBoards.getColumns.head.getCards.head
+  val kanbanApp = new Kanban
+  val fileManager = new FileHandler
+  val noCard = new Card("", Color.Black)
+  var activeCard = noCard
   var cardActiveStatus = true
 
   var activeBoard = kanbanApp.getBoards
 
+  var cardMoveActive = false
+
+
   val fontChoice = Font.font("arial", 16)
 
   def drawCard(column: Column, card: Card): VBox = new VBox(4) {
-    border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
+    if (activeCard == card) {
+      border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dashed, new CornerRadii(2), new BorderWidths(6)))
+    } else {
+      border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
+    }
+
     minWidth = 250
     maxWidth = 250
     minHeight = 150
@@ -78,12 +90,41 @@ object Main extends JFXApp {
 
     }
     onMouseClicked = (event) => {
-      activeCard = card
+      if (activeCard == card) {
+        activeCard = noCard
+        cardMoveActive = false
+      } else {
+        activeCard = card
+        kanbanApp.setActiveColumn(column)
+        cardMoveActive = true
+      }
+
       stage.scene = new Scene(root)
+    }
+    onDragDetected = (event) => {
+      println(event)
     }
   }
 
-  def drawColumn(board: Board, column: Column): VBox = new VBox(8) {
+  def getPane(column: Column, minheight: Int) = {
+    new Pane() {
+      minHeight = minheight
+      onMouseReleased = (event) => {
+        println(panes)
+        println(event.getPickResult.getIntersectedNode.toString)
+        println(panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString))
+        val index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
+        if (cardMoveActive) {
+          kanbanApp.getActiveColumn.deleteCard(activeCard)
+          column.addCard(activeCard.getText, activeCard.getColor, index)
+          stage.scene = new Scene(root)
+          cardMoveActive = false
+        }
+      }
+    }
+  }
+
+  def drawColumn(board: Board, column: Column): VBox = new VBox() {
     alignment = TopCenter
     minHeight = stage.height.value
     minWidth = 280
@@ -136,24 +177,35 @@ object Main extends JFXApp {
         }
       }
     }
-
+    children += new Separator
+    panes(column) = Buffer[String]()
     for (card <- column.getCards) {
+      val pane = getPane(column, 20)
+      panes(column) += pane.toString()
+      children += pane
       children += drawCard(column, card)
+
+    }
+    val pane = getPane(column, 50)
+    panes(column) += pane.toString()
+    children += pane
+  }
+
+  val menubar = new MenuBar {
+    menus += new Menu("File") {
+      items += new MenuItem("Open")
+      items += new MenuItem("Save")
+      items += new SeparatorMenuItem
+      items += new MenuItem("Exit") {
+        onAction = (event) => sys.exit(0)
+      }
     }
   }
 
   def root: VBox = new VBox(8) {
 
-    children += new MenuBar {
-      menus += new Menu("File") {
-        items += new MenuItem("Open")
-        items += new MenuItem("Save")
-        items += new SeparatorMenuItem
-        items += new MenuItem("Exit") {
-          onAction = (event) => sys.exit(0)
-        }
-      }
-    }
+    children += menubar
+
 
     children += new HBox(14) {
       alignment = CenterLeft
