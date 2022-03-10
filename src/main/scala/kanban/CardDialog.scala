@@ -1,6 +1,6 @@
 package kanban
 
-import kanban.Main.{activeCard, cardEditActive, kanbanApp, stage}
+import kanban.Main.{activeCard, activeColumn, cardEditActive, kanbanApp, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.geometry.Insets
@@ -74,7 +74,7 @@ object CardDialog {
         activeCard.editCard(cardText.text(), cardColor.getValue)
         new Card(cardText.text(), cardColor.getValue)
       } else {
-        kanbanApp.getActiveColumn.addCard(cardText.text(), cardColor.getValue)
+        activeColumn.addCard(cardText.text(), cardColor.getValue)
         new Card(cardText.text(), cardColor.getValue)
       }
 

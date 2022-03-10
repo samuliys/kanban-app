@@ -1,7 +1,7 @@
 package kanban
 
 import scalafx.scene.paint.Color
-import kanban.Main.{columnEditActive, kanbanApp, stage}
+import kanban.Main.{activeColumn, columnEditActive, kanbanApp, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.geometry.Insets
@@ -70,7 +70,7 @@ object ColumnDialog {
   dialog.resultConverter = dialogButton =>
     if (dialogButton == okButtonType) {
       if (columnEditActive) {
-        kanbanApp.getActiveColumn.editColumn(columnName.text(), columnColor.getValue)
+        activeColumn.editColumn(columnName.text(), columnColor.getValue)
         new Column(columnName.text(), columnColor.getValue)
       } else {
         kanbanApp.getBoards.addColumn(columnName.text(), columnColor.getValue)
