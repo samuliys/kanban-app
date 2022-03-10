@@ -7,6 +7,9 @@ scalaVersion := "2.13.8"
 // Add dependency on ScalaFX library
 libraryDependencies += "org.scalafx" %% "scalafx" % "14-R19"
 
+// Add dependency on circe library
+libraryDependencies += "io.circe" %% "circe-core" % "0.14.1"
+
 
 // Determine OS version of JavaFX binaries
 lazy val osName = System.getProperty("os.name") match {
