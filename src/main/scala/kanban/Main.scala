@@ -19,14 +19,16 @@ object Main extends JFXApp {
     width = 1000
     height = 700
   }
+
   var cardEditActive = false
   var columnEditActive = false
+  var tagEditActive = false
 
   val panes = Map[Column, Buffer[String]]()
 
   val kanbanApp = new Kanban
   val fileManager = new FileHandler
-  val noCard = new Card("", Color.Black)
+  val noCard = new Card("", Color.Black, Buffer[Tag]())
   var activeCard = noCard
   var cardActiveStatus = true
 
@@ -132,7 +134,7 @@ object Main extends JFXApp {
             index = index - 1
           }
           activeColumn.deleteCard(activeCard)
-          column.addCard(activeCard.getText, activeCard.getColor, index)
+          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, index)
           update()
           cardMoveActive = false
         }
@@ -140,9 +142,12 @@ object Main extends JFXApp {
     }
   }
 
-  def drawColumnNewCard(column: Column): Button = {
-    new Button("New Card") {
+  def drawColumnNewCard(column: Column): SplitMenuButton = {
+    new SplitMenuButton {
+      text = "New Card"
       font = fontChoice
+
+      items += new MenuItem("From Archive") {}
 
       onAction = (event) => {
         activeColumn = column
@@ -223,7 +228,7 @@ object Main extends JFXApp {
     children += pane
   }
 
-  def toolbar = new ToolBar{
+  def toolbar = new ToolBar {
     items += new Button("New Board") {
       font = fontChoice
     }
@@ -240,6 +245,7 @@ object Main extends JFXApp {
         }
       }
       items += new SeparatorMenuItem
+
       for (tag <- kanbanApp.getTagNames) {
         items += new MenuItem(tag) {
           onAction = (event) => {
@@ -250,7 +256,6 @@ object Main extends JFXApp {
               currentFilter += thisTag
             }
             update()
-            println(currentFilter)
           }
         }
       }
