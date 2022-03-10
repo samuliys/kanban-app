@@ -37,17 +37,55 @@ object Main extends JFXApp {
 
 
   val fontChoice = Font.font("arial", 16)
+  val cardSizeWidth = 250
+  val cardSizeHeight = 100
+
+  def drawCardDelete(column: Column, card: Card) = {
+    new Button("Delete") {
+      onAction = (event) => {
+        val alert = new Alert(AlertType.Confirmation) {
+          initOwner(stage)
+          title = "Delete Card"
+          contentText = "Are you sure you want to delete the card?"
+        }
+
+        val result = alert.showAndWait()
+        result match {
+          case Some(ButtonType.OK) => {
+            column.deleteCard(card)
+            update()
+          }
+          case _ =>
+        }
+      }
+    }
+  }
+
+  def drawCardEdit(card: Card) = {
+    new Button("Edit") {
+      onAction = (event) => {
+        cardEditActive = true
+        CardDialog.setCardEdit(card)
+        val result = CardDialog.dialog.showAndWait()
+        update()
+        cardEditActive = false
+      }
+    }
+  }
 
   def drawCard(column: Column, card: Card): VBox = new VBox(4) {
+
     if (activeCard == card) {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dashed, new CornerRadii(2), new BorderWidths(6)))
     } else {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     }
 
-    minWidth = 250
-    maxWidth = 250
-    minHeight = 150
+    minWidth = cardSizeWidth
+    maxWidth = cardSizeWidth
+    minHeight = cardSizeHeight
+    maxHeight = cardSizeHeight
+
     alignment = Center
     children += new Label(card.getText) {
       wrapText = true
@@ -58,35 +96,8 @@ object Main extends JFXApp {
     if (activeCard == card) {
       children += new HBox(4) {
         alignment = Center
-        children += new Button("Edit") {
-          onAction = (event) => {
-            cardEditActive = true
-            CardDialog.setCardEdit(card)
-            val result = CardDialog.dialog.showAndWait()
-            stage.scene = new Scene(root)
-            cardEditActive = false
-          }
-        }
-
-        children += new Button("Delete") {
-          onAction = (event) => {
-            val alert = new Alert(AlertType.Confirmation) {
-              initOwner(stage)
-              title = "Delete Card"
-              contentText = "Are you sure you want to delete the card?"
-            }
-
-            val result = alert.showAndWait()
-            result match {
-              case Some(ButtonType.OK) => {
-                column.deleteCard(card)
-                stage.scene = new Scene(root)
-              }
-              case _ =>
-            }
-          }
-
-        }
+        children += drawCardEdit(card)
+        children += drawCardDelete(column, card)
         children += new Button("Archive")
       }
 
@@ -103,18 +114,12 @@ object Main extends JFXApp {
 
       stage.scene = new Scene(root)
     }
-    onDragDetected = (event) => {
-      println(event)
-    }
   }
 
   def getPane(column: Column, minheight: Int) = {
     new Pane() {
       minHeight = minheight
       onMouseReleased = (event) => {
-        println(panes)
-        println(event.getPickResult.getIntersectedNode.toString)
-        println(panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString))
         var index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
         if (cardMoveActive && index != -1) {
           if (activeColumn == column && column.getCards.indexOf(activeCard) < index) {
@@ -122,8 +127,58 @@ object Main extends JFXApp {
           }
           activeColumn.deleteCard(activeCard)
           column.addCard(activeCard.getText, activeCard.getColor, index)
-          stage.scene = new Scene(root)
+          update()
           cardMoveActive = false
+        }
+      }
+    }
+  }
+
+  def drawColumnNewCard(column: Column) = {
+    new Button("New Card") {
+      font = fontChoice
+
+      onAction = (event) => {
+        activeColumn = column
+        CardDialog.reset()
+        val result = CardDialog.dialog.showAndWait()
+        update()
+      }
+    }
+  }
+
+  def drawColumnEdit(column: Column) = {
+    new Button("Edit") {
+      font = fontChoice
+
+      onAction = (event) => {
+        activeColumn = column
+        columnEditActive = true
+        ColumnDialog.setColumnEdit(column)
+        val result = ColumnDialog.dialog.showAndWait()
+        update()
+        columnEditActive = false
+      }
+    }
+  }
+
+  def drawColumnDelete(board: Board, column: Column) = {
+    new Button("Delete") {
+      font = fontChoice
+      onAction = (event) => {
+        val alert = new Alert(AlertType.Confirmation) {
+          initOwner(stage)
+          title = "Delete Column"
+          contentText = "Are you sure you want to delete the column?"
+        }
+
+        val result = alert.showAndWait()
+        result match {
+          case Some(ButtonType.OK) => {
+            board.deleteColumn(column)
+            update()
+          }
+          case _ =>
         }
       }
     }
@@ -140,49 +195,12 @@ object Main extends JFXApp {
     }
     children += new HBox(10) {
       alignment = Center
-      children += new Button("New Card") {
-        font = fontChoice
-
-        onAction = (event) => {
-          activeColumn = column
-          CardDialog.reset()
-          val result = CardDialog.dialog.showAndWait()
-          stage.scene = new Scene(root)
-        }
-      }
-      children += new Button("Edit") {
-        font = fontChoice
-
-        onAction = (event) => {
-          activeColumn = column
-          columnEditActive = true
-          ColumnDialog.setColumnEdit(column)
-          val result = ColumnDialog.dialog.showAndWait()
-          stage.scene = new Scene(root)
-          columnEditActive = false
-        }
-      }
-      children += new Button("Delete") {
-        font = fontChoice
-        onAction = (event) => {
-          val alert = new Alert(AlertType.Confirmation) {
-            initOwner(stage)
-            title = "Delete Column"
-            contentText = "Are you sure you want to delete the column?"
-          }
-
-          val result = alert.showAndWait()
-          result match {
-            case Some(ButtonType.OK) => {
-              board.deleteColumn(column)
-              stage.scene = new Scene(root)
-            }
-            case _ =>
-          }
-        }
-      }
+      children += drawColumnNewCard(column)
+      children += drawColumnEdit(column)
+      children += drawColumnDelete(board, column)
     }
     children += new Separator
+
     panes(column) = Buffer[String]()
     for (card <- column.getCards) {
       val pane = getPane(column, 20)
@@ -222,11 +240,13 @@ object Main extends JFXApp {
         onAction = (event) => {
           ColumnDialog.reset()
           val result = ColumnDialog.dialog.showAndWait()
-          stage.scene = new Scene(root)
+          update()
         }
       }
     }
   }
+
+  def update() = stage.scene = new Scene(root)
 
   val scene = new Scene(root)
   stage.scene = scene
