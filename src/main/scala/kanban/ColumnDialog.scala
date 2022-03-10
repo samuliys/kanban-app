@@ -1,7 +1,7 @@
 package kanban
 
 import scalafx.scene.paint.Color
-import kanban.Main.{columnEditActive, kanbanApp, stage}
+import kanban.Main.{activeColumn, columnEditActive, kanbanApp, stage}
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.geometry.Insets
@@ -14,15 +14,15 @@ object ColumnDialog {
 
   val dialog = new Dialog[Column]() {
     initOwner(stage)
-    title = "Kanban - new column"
-    headerText = "Add new column"
+    title = "Kanban - new list"
+    headerText = "Add new list"
   }
 
   val okButtonType = new ButtonType("OK", ButtonData.OKDone)
   dialog.dialogPane().buttonTypes = Seq(okButtonType, ButtonType.Cancel)
 
   val columnName = new TextField() {
-    promptText = "Card Text"
+    promptText = "List name"
     minWidth = 200
   }
 
@@ -53,16 +53,16 @@ object ColumnDialog {
   Platform.runLater(columnName.requestFocus())
 
   def reset() = {
-    dialog.title = "Kanban - new column"
-    dialog.headerText = "Add new column"
+    dialog.title = "Kanban - new list"
+    dialog.headerText = "Add new list"
     columnName.text = ""
     columnColor.value = Color.Black
   }
 
   def setColumnEdit(column: Column) = {
     reset()
-    dialog.title = "Kanban - column edit"
-    dialog.headerText = "Edit column"
+    dialog.title = "Kanban - list edit"
+    dialog.headerText = "Edit list"
     columnName.text = column.getName
     columnColor.value = column.getColor
   }
@@ -70,7 +70,7 @@ object ColumnDialog {
   dialog.resultConverter = dialogButton =>
     if (dialogButton == okButtonType) {
       if (columnEditActive) {
-        kanbanApp.getActiveColumn.editColumn(columnName.text(), columnColor.getValue)
+        activeColumn.editColumn(columnName.text(), columnColor.getValue)
         new Column(columnName.text(), columnColor.getValue)
       } else {
         kanbanApp.getBoards.addColumn(columnName.text(), columnColor.getValue)

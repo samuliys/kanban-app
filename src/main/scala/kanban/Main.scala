@@ -8,6 +8,9 @@ import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.text._
 import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.input._
+import scalafx.scene.paint.Color
+import scala.collection.mutable.{Buffer, Map}
 
 
 object Main extends JFXApp {
@@ -16,24 +19,81 @@ object Main extends JFXApp {
     width = 1000
     height = 700
   }
+
   var cardEditActive = false
   var columnEditActive = false
+  var tagEditActive = false
 
-  val kanbanApp = new Kanban()
+  val panes = Map[Column, Buffer[String]]()
+
+  val kanbanApp = new Kanban
   val fileManager = new FileHandler
-
-  var activeCard = kanbanApp.getBoards.getColumns.head.getCards.head
+  val noCard = new Card("", Color.Black, Buffer[Tag]())
+  var activeCard = noCard
   var cardActiveStatus = true
 
   var activeBoard = kanbanApp.getBoards
 
-  val fontChoice = Font.font("arial", 16)
+  var activeColumn = kanbanApp.getBoards.getColumns.head
+
+  var cardMoveActive = false
+
+
+  val fontChoice = Font.font("arial", 14)
+  val cardSizeWidth = 250
+  val cardSizeHeight = 100
+
+  val currentFilter = Buffer[Tag]()
+
+  def drawAlert(alertTitle: String, content: String): Alert = {
+    new Alert(AlertType.Confirmation) {
+      initOwner(stage)
+      title = alertTitle
+      contentText = content
+    }
+  }
+
+  def drawCardDelete(column: Column, card: Card): Button = {
+    new Button("Delete") {
+      onAction = (event) => {
+
+        val result = drawAlert("Delete Card", "Are you sure you want to delete the card?").showAndWait()
+        result match {
+          case Some(ButtonType.OK) => {
+            column.deleteCard(card)
+            update()
+          }
+          case _ =>
+        }
+      }
+    }
+  }
+
+  def drawCardEdit(card: Card): Button = {
+    new Button("Edit") {
+      onAction = (event) => {
+        cardEditActive = true
+        CardDialog.setCardEdit(card)
+        val result = CardDialog.dialog.showAndWait()
+        update()
+        cardEditActive = false
+      }
+    }
+  }
 
   def drawCard(column: Column, card: Card): VBox = new VBox(4) {
-    border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
-    minWidth = 250
-    maxWidth = 250
-    minHeight = 150
+
+    if (activeCard == card) {
+      border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
+    } else {
+      border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
+    }
+
+    minWidth = cardSizeWidth
+    maxWidth = cardSizeWidth
+    minHeight = cardSizeHeight
+    maxHeight = cardSizeHeight
+
     alignment = Center
     children += new Label(card.getText) {
       wrapText = true
@@ -44,48 +104,99 @@ object Main extends JFXApp {
     if (activeCard == card) {
       children += new HBox(4) {
         alignment = Center
-        children += new Button("Edit") {
-          onAction = (event) => {
-            cardEditActive = true
-            CardDialog.setCardEdit(card)
-            val result = CardDialog.dialog.showAndWait()
-            stage.scene = new Scene(root)
-            cardEditActive = false
-          }
-        }
-
-        children += new Button("Delete") {
-          onAction = (event) => {
-            val alert = new Alert(AlertType.Confirmation) {
-              initOwner(stage)
-              title = "Delete Card"
-              contentText = "Are you sure you want to delete the card?"
-            }
-
-            val result = alert.showAndWait()
-            result match {
-              case Some(ButtonType.OK) => {
-                column.deleteCard(card)
-                stage.scene = new Scene(root)
-              }
-              case _ =>
-            }
-          }
-
-        }
+        children += drawCardEdit(card)
+        children += drawCardDelete(column, card)
         children += new Button("Archive")
       }
 
     }
     onMouseClicked = (event) => {
-      activeCard = card
+      if (activeCard == card) {
+        activeCard = noCard
+        cardMoveActive = false
+      } else {
+        activeCard = card
+        activeColumn = column
+        cardMoveActive = true
+      }
+
       stage.scene = new Scene(root)
     }
   }
 
-  def drawColumn(board: Board, column: Column): VBox = new VBox(8) {
+  def getPane(column: Column, minheight: Int): Pane = {
+    new Pane() {
+      minHeight = minheight
+      onMouseReleased = (event) => {
+        var index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
+        if (cardMoveActive && index != -1) {
+          if (activeColumn == column && column.getCards.indexOf(activeCard) < index) {
+            index = index - 1
+          }
+          activeColumn.deleteCard(activeCard)
+          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, index)
+          update()
+          cardMoveActive = false
+        }
+      }
+    }
+  }
+
+  def drawColumnNewCard(column: Column): SplitMenuButton = {
+    new SplitMenuButton {
+      text = "New Card"
+      font = fontChoice
+
+      items += new MenuItem("From Archive") {}
+
+      onAction = (event) => {
+        activeColumn = column
+        activeCard = noCard
+        cardActiveStatus = false
+        CardDialog.reset()
+        val result = CardDialog.dialog.showAndWait()
+        update()
+      }
+    }
+  }
+
+  def drawColumnEdit(column: Column): Button = {
+    new Button("Edit") {
+      font = fontChoice
+
+      onAction = (event) => {
+        activeColumn = column
+        activeCard = noCard
+        cardActiveStatus = false
+        columnEditActive = true
+        ColumnDialog.setColumnEdit(column)
+        val result = ColumnDialog.dialog.showAndWait()
+        update()
+        columnEditActive = false
+      }
+    }
+  }
+
+  def drawColumnDelete(board: Board, column: Column): Button = {
+    new Button("Delete") {
+      font = fontChoice
+      onAction = (event) => {
+
+        val result = drawAlert("Delete List", "Are you sure you want to delete the list?").showAndWait()
+        result match {
+          case Some(ButtonType.OK) => {
+            board.deleteColumn(column)
+            update()
+          }
+          case _ =>
+        }
+      }
+    }
+  }
+
+  def drawColumn(board: Board, column: Column): VBox = new VBox {
     alignment = TopCenter
-    minHeight = stage.height.value
+    minHeight = stage.height.value - 80
     minWidth = 280
     border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     children += new Label(column.getName) {
@@ -94,71 +205,124 @@ object Main extends JFXApp {
     }
     children += new HBox(10) {
       alignment = Center
-      children += new Button("New Card") {
-        font = fontChoice
+      children += drawColumnNewCard(column)
+      children += drawColumnEdit(column)
+      children += drawColumnDelete(board, column)
+    }
+    children += new Separator
 
+    panes(column) = Buffer[String]()
+    for (card <- column.getCards) {
+      val pane = getPane(column, 20)
+      panes(column) += pane.toString()
+      children += pane
+      //children += drawCard(column, card)
+      if (currentFilter.forall(card.getTags.contains(_))) {
+        children += drawCard(column, card)
+      }
+
+
+    }
+    val pane = getPane(column, 50)
+    panes(column) += pane.toString()
+    children += pane
+  }
+
+  def toolbar = new ToolBar {
+    items += new Button("New Board") {
+      font = fontChoice
+    }
+    items += new Button("Edit Board") {
+      font = fontChoice
+    }
+    items += new Separator
+    items += new MenuButton("Filter") {
+      font = fontChoice
+      items += new MenuItem("Reset") {
         onAction = (event) => {
-          kanbanApp.setActiveColumn(column)
-          CardDialog.reset()
-          val result = CardDialog.dialog.showAndWait()
-          stage.scene = new Scene(root)
+          currentFilter.clear()
+          update()
         }
       }
-      children += new Button("Edit") {
-        font = fontChoice
+      items += new SeparatorMenuItem
 
-        onAction = (event) => {
-          kanbanApp.setActiveColumn(column)
-          columnEditActive = true
-          ColumnDialog.setColumnEdit(column)
-          val result = ColumnDialog.dialog.showAndWait()
-          stage.scene = new Scene(root)
-          columnEditActive = false
-        }
-      }
-      children += new Button("Delete") {
-        font = fontChoice
-        onAction = (event) => {
-          val alert = new Alert(AlertType.Confirmation) {
-            initOwner(stage)
-            title = "Delete Column"
-            contentText = "Are you sure you want to delete the column?"
+      for (tag <- kanbanApp.getTagNames) {
+        items += new MenuItem(tag) {
+          onAction = (event) => {
+            val thisTag = kanbanApp.getTag(tag)
+            if (currentFilter.contains(thisTag)) {
+              currentFilter.remove(currentFilter.indexOf(thisTag))
+            } else {
+              currentFilter += thisTag
+            }
+            update()
           }
+        }
+      }
+    }
+    items += new Button("Manage Tags") {
+      font = fontChoice
+      onAction = (event) => {
+        TagDialog.reset()
+        TagDialog.dialog.showAndWait()
+        update()
+      }
+    }
+    items += new Separator
+    items += new Button("Archive") {
+      font = fontChoice
+    }
+  }
 
-          val result = alert.showAndWait()
+  val menubar = new MenuBar {
+    menus += new Menu("File") {
+      items += new MenuItem("New") {
+        accelerator = new KeyCodeCombination(KeyCode.N, KeyCombination.ControlDown)
+      }
+      items += new MenuItem("Open") {
+        accelerator = new KeyCodeCombination(KeyCode.O, KeyCombination.ControlDown)
+      }
+      items += new MenuItem("Save") {
+        accelerator = new KeyCodeCombination(KeyCode.S, KeyCombination.ControlDown)
+      }
+      items += new SeparatorMenuItem
+      items += new MenuItem("Exit") {
+        accelerator = new KeyCodeCombination(KeyCode.Q, KeyCombination.ControlDown)
+        onAction = (event) => {
+          val result = drawAlert("Exit", "Are you sure you want to exit?").showAndWait()
           result match {
             case Some(ButtonType.OK) => {
-              board.deleteColumn(column)
-              stage.scene = new Scene(root)
+              sys.exit(0)
             }
             case _ =>
           }
         }
       }
     }
-
-    for (card <- column.getCards) {
-      children += drawCard(column, card)
-    }
   }
 
   def root: VBox = new VBox(8) {
+
+    children += menubar
+    children += toolbar
 
     children += new HBox(14) {
       alignment = CenterLeft
       for (column <- kanbanApp.getBoards.getColumns) {
         children += drawColumn(activeBoard, column)
       }
-      children += new Button("New Column") {
+      children += new Button("New List") {
         font = fontChoice
         onAction = (event) => {
           ColumnDialog.reset()
           val result = ColumnDialog.dialog.showAndWait()
-          stage.scene = new Scene(root)
+          update()
         }
       }
     }
   }
+
+  def update(): Unit = stage.scene = new Scene(root)
 
   val scene = new Scene(root)
   stage.scene = scene

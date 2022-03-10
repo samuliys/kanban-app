@@ -7,9 +7,9 @@ import scala.collection.mutable.Buffer
 
 class Column(private var name: String, private var color: Color) {
   private val cards = Buffer[Card]()
-  this.addCard("card1", Color.Blue)
-  this.addCard("card2", Color.GreenYellow)
-  this.addCard("card3", Color.OrangeRed)
+  this.addCard("card1", Color.Blue, Buffer[Tag]())
+  this.addCard("card2", Color.Green, Buffer[Tag]())
+  this.addCard("card3", Color.OrangeRed, Buffer[Tag]())
 
   def getCards = this.cards
   def getName = name
@@ -17,9 +17,10 @@ class Column(private var name: String, private var color: Color) {
 
   def rename(newName: String) = name = newName
 
-  def addCard(name: String = "untitled", color: Color = Color.Blue) = {
-    val card = new Card(name, color)
-    cards += card
+  def addCard(name: String, color: Color, tags: Buffer[Tag], index: Int = cards.size): Card = {
+    val card = new Card(name, color, tags)
+    cards.insert(index, card)
+    card
   }
 
   def deleteCard(card: Card) = {
