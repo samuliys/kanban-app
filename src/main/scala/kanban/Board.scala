@@ -24,6 +24,10 @@ class Board(private var name: String) {
     columns += column
   }
 
+  def addColumn(column: Column, index: Int) = {
+    columns.insert(index, column)
+  }
+
   def deleteColumn(column: Column) = {
     columns.remove(columns.indexOf(column))
   }

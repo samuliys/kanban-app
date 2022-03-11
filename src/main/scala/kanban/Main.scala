@@ -8,7 +8,6 @@ import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.text._
 import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.TabPane.TabClosingPolicy
 import scalafx.scene.input._
 import scalafx.scene.paint.Color
 import scala.collection.mutable.{Buffer, Map}
@@ -16,7 +15,7 @@ import scala.collection.mutable.{Buffer, Map}
 
 object Main extends JFXApp {
   stage = new JFXApp.PrimaryStage {
-    title.value = "KanbanApp - SY"
+    title.value = "KanbanApp"
     width = 1100
     height = 800
   }
@@ -26,16 +25,19 @@ object Main extends JFXApp {
   var tagEditActive = false
 
   val panes = Map[Column, Buffer[String]]()
+  val columnPanes = Buffer[String]()
 
   val kanbanApp = new Kanban
   val fileManager = new FileHandler
   val noCard = new Card("", Color.Black, Buffer[Tag](), None)
+  val noColumn = new Column("", Color.Black)
   var activeCard = noCard
   var cardActiveStatus = true
 
   var activeBoard = kanbanApp.getBoards.head
 
-  var activeColumn = activeBoard.getColumns.head
+  var activeColumn = noColumn
+  var columnMove = noColumn
 
   var cardMoveActive = false
 
@@ -79,6 +81,7 @@ object Main extends JFXApp {
         val result = CardDialog.dialog.showAndWait()
         cardEditActive = false
         activeCard = noCard
+        activeColumn = noColumn
         update()
 
       }
@@ -91,6 +94,7 @@ object Main extends JFXApp {
         board.getArchive.addCard(card)
         column.deleteCard(card)
         activeCard = noCard
+        activeColumn = noColumn
         update()
 
       }
@@ -135,18 +139,39 @@ object Main extends JFXApp {
     onMouseClicked = (event) => {
       if (activeCard == card) {
         activeCard = noCard
+        activeColumn = noColumn
+        columnMove = noColumn
         cardMoveActive = false
       } else {
         activeCard = card
         activeColumn = column
+        columnMove = noColumn
         cardMoveActive = true
       }
       update()
     }
   }
 
+  def getColumnPane(board: Board, minwidth: Int): Pane = {
+    new Pane {
+      minWidth = minwidth
+      onMouseReleased = (event) => {
+        var index = columnPanes.indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
+        if (index != -1 && columnMove != noColumn) {
+          if (board.getColumns.indexOf(columnMove) < index) {
+            index -= 1
+          }
+          board.deleteColumn(columnMove)
+          board.addColumn(columnMove, index)
+          columnMove = noColumn
+          update()
+        }
+      }
+    }
+  }
+
   def getPane(column: Column, minheight: Int): Pane = {
-    new Pane() {
+    new Pane {
       minHeight = minheight
       onMouseReleased = (event) => {
         var index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
@@ -176,6 +201,7 @@ object Main extends JFXApp {
         cardActiveStatus = false
         CardDialog.reset()
         val result = CardDialog.dialog.showAndWait()
+        activeColumn = noColumn
         update()
       }
     }
@@ -216,19 +242,38 @@ object Main extends JFXApp {
   }
 
   def drawColumn(board: Board, column: Column): VBox = new VBox {
+
+    if (columnMove == column) {
+      border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
+    } else {
+      border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
+    }
     alignment = TopCenter
     minHeight = stage.height.value - 116
     minWidth = 280
-    border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
+
     children += new Label(column.getName) {
       minHeight = 40
       font = Font.font("arial", 20)
     }
-    children += new HBox(10) {
+    children += new HBox(2) {
       alignment = Center
       children += drawColumnNewCard(column)
       children += drawColumnEdit(column)
       children += drawColumnDelete(board, column)
+      children += new Button("Move") {
+        font = fontChoice
+        onAction = (event) => {
+          if (columnMove == column) {
+            columnMove = noColumn
+          } else {
+            columnMove = column
+            cardMoveActive = false
+            activeCard = noCard
+          }
+          update()
+        }
+      }
     }
     children += new Separator
 
@@ -242,7 +287,6 @@ object Main extends JFXApp {
         children += drawCard(board, column, card)
       }
 
-
     }
     val pane = getPane(column, 50)
     panes(column) += pane.toString()
@@ -255,6 +299,7 @@ object Main extends JFXApp {
       minHeight = 20
       onAction = (event) => {
         activeCard = noCard
+        activeColumn = noColumn
         cardMoveActive = false
         activeBoard = kanbanApp.getBoards(kanbanApp.getBoardNames.indexOf(value()))
         println(value())
@@ -278,6 +323,7 @@ object Main extends JFXApp {
         onAction = (event) => {
           currentFilter.clear()
           activeCard = noCard
+          activeColumn = noColumn
           cardMoveActive = false
           update()
         }
@@ -288,6 +334,7 @@ object Main extends JFXApp {
         items += new MenuItem(tag) {
           onAction = (event) => {
             activeCard = noCard
+            activeColumn = noColumn
             cardMoveActive = false
             val thisTag = kanbanApp.getTag(tag)
             if (currentFilter.contains(thisTag)) {
@@ -339,11 +386,20 @@ object Main extends JFXApp {
   }
 
   def drawBoard(board: Board): HBox = {
-    new HBox(14) {
+    new HBox() {
       alignment = CenterLeft
+      columnPanes.clear()
       for (column <- board.getColumns) {
+        val pane = getColumnPane(board, 20)
+        columnPanes += pane.toString()
+        children += pane
         children += drawColumn(board, column)
       }
+
+      val pane = getColumnPane(board, 100)
+      columnPanes += pane.toString()
+      children += pane
+
       children += new Button("New List") {
         font = fontChoice
         onAction = (event) => {
@@ -353,7 +409,6 @@ object Main extends JFXApp {
           update()
         }
       }
-
     }
   }
 
