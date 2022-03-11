@@ -17,7 +17,7 @@ import scala.collection.mutable.{Buffer, Map}
 object Main extends JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "KanbanApp - SY"
-    width = 1000
+    width = 1100
     height = 800
   }
 
@@ -217,7 +217,7 @@ object Main extends JFXApp {
 
   def drawColumn(board: Board, column: Column): VBox = new VBox {
     alignment = TopCenter
-    minHeight = stage.height.value - 146
+    minHeight = stage.height.value - 116
     minWidth = 280
     border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     children += new Label(column.getName) {
@@ -250,6 +250,17 @@ object Main extends JFXApp {
   }
 
   def toolbar = new ToolBar {
+    items += new ComboBox(kanbanApp.getBoardNames) {
+      promptText = activeBoard.getName
+      minHeight = 20
+      onAction = (event) => {
+        activeCard = noCard
+        cardMoveActive = false
+        activeBoard = kanbanApp.getBoards(kanbanApp.getBoardNames.indexOf(value()))
+        println(value())
+        update()
+      }
+    }
     items += new Button("New Board") {
       font = fontChoice
     }
@@ -327,52 +338,30 @@ object Main extends JFXApp {
     }
   }
 
-  def drawBoard(board: Board): Tab = {
-    new Tab {
-      text = board.getName
-      content = new HBox(14) {
-        alignment = CenterLeft
-        for (column <- board.getColumns) {
-          children += drawColumn(board, column)
-        }
-        children += new Button("New List") {
-          font = fontChoice
-          onAction = (event) => {
-            activeBoard = board
-            ColumnDialog.reset()
-            val result = ColumnDialog.dialog.showAndWait()
-            update()
-          }
-        }
-
+  def drawBoard(board: Board): HBox = {
+    new HBox(14) {
+      alignment = CenterLeft
+      for (column <- board.getColumns) {
+        children += drawColumn(board, column)
       }
+      children += new Button("New List") {
+        font = fontChoice
+        onAction = (event) => {
+          activeBoard = board
+          ColumnDialog.reset()
+          val result = ColumnDialog.dialog.showAndWait()
+          update()
+        }
+      }
+
     }
   }
-
-  def boardTabs: Buffer[Tab] = {
-    val tabs = Buffer[Tab]()
-    for (board <- kanbanApp.getBoards) {
-      tabs += drawBoard(board)
-    }
-    tabs
-  }
-
-  val tabpane = new TabPane {
-    tabClosingPolicy = TabClosingPolicy.Unavailable
-    tabs = boardTabs.toSeq
-  }
-
-  val selectionmodel = tabpane.getSelectionModel
-  var currentSelected = selectionmodel.getSelectedIndex
 
   def root: VBox = new VBox(8) {
-    currentSelected = selectionmodel.getSelectedIndex
+    stage.title = "KanbanApp - " + activeBoard.getName
     children += menubar
     children += toolbar
-    children += tabpane
-    tabpane.tabs = boardTabs.toSeq
-
-    selectionmodel.select(currentSelected)
+    children += drawBoard(activeBoard)
   }
 
   def update(): Unit = stage.scene = new Scene(root)
