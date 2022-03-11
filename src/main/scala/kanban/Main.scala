@@ -85,7 +85,19 @@ object Main extends JFXApp {
     }
   }
 
-  def drawCard(column: Column, card: Card): VBox = new VBox(4) {
+  def drawCardArchive(board: Board, column: Column, card: Card): Button = {
+    new Button("Archive") {
+      onAction = (event) => {
+        board.getArchive.addCard(card)
+        column.deleteCard(card)
+        activeCard = noCard
+        update()
+
+      }
+    }
+  }
+
+  def drawCard(board: Board, column: Column, card: Card): VBox = new VBox(4) {
 
     if (activeCard == card) {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
@@ -116,7 +128,7 @@ object Main extends JFXApp {
         alignment = Center
         children += drawCardEdit(card)
         children += drawCardDelete(column, card)
-        children += new Button("Archive")
+        children += drawCardArchive(board, column, card)
       }
 
     }
@@ -227,7 +239,7 @@ object Main extends JFXApp {
       children += pane
       //children += drawCard(column, card)
       if (currentFilter.forall(card.getTags.contains(_))) {
-        children += drawCard(column, card)
+        children += drawCard(board, column, card)
       }
 
 

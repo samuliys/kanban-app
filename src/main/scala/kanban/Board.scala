@@ -7,8 +7,12 @@ import scala.collection.mutable.Buffer
 
 class Board(private var name: String) {
   private val columns = Buffer[Column]()
-  this.addColumn("Column1", Color.OrangeRed)
-  this.addColumn("Column2", Color.SeaGreen)
+  this.addColumn("List1", Color.Black)
+  this.addColumn("List2", Color.Black)
+
+  private val archive = new Column("Archive", Color.Black)
+
+  def getArchive = archive
 
   def getColumns = this.columns
   def getName = name

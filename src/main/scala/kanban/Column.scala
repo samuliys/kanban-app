@@ -23,6 +23,10 @@ class Column(private var name: String, private var color: Color) {
     card
   }
 
+  def addCard(card: Card) = {
+    cards.insert(0, card)
+  }
+
   def deleteCard(card: Card) = {
     cards.remove(cards.indexOf(card))
   }
