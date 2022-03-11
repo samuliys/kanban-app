@@ -17,8 +17,8 @@ class Column(private var name: String, private var color: Color) {
 
   def rename(newName: String) = name = newName
 
-  def addCard(name: String, color: Color, tags: Buffer[Tag], index: Int = cards.size): Card = {
-    val card = new Card(name, color, tags)
+  def addCard(name: String, color: Color, tags: Buffer[Tag], deadline: Option[Deadline] = None, index: Int = cards.size): Card = {
+    val card = new Card(name, color, tags, deadline)
     cards.insert(index, card)
     card
   }

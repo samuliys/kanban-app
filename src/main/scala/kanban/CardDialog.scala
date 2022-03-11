@@ -77,6 +77,15 @@ object CardDialog {
 
   val drawDatePicker = new DatePicker(LocalDate.now)
 
+  val checkbox = new CheckBox("Include Deadline") {
+    minWidth = 100
+    onAction = (event) => checkCheckbox()
+  }
+
+  def checkCheckbox(): Unit = {
+    drawDatePicker.disable = !checkbox.selected()
+  }
+
   def drawContents: VBox = new VBox(10) {
     minWidth = 500
     minHeight = 400
@@ -91,9 +100,7 @@ object CardDialog {
     children += new Separator
     children += new HBox(10) {
       children += new Label("Deadline: ")
-      children += new CheckBox("Include Deadline") {
-
-      }
+      children += checkbox
       children += drawDatePicker
     }
     children += new Separator
@@ -137,7 +144,11 @@ object CardDialog {
     cardText.text = ""
     cardColor.value = Color.Black
     cardTags.clear()
+    checkbox.selected = false
+    drawDatePicker.disable = true
+    drawDatePicker.value = LocalDate.now()
     resetTagEdit()
+
   }
 
   def setCardEdit(card: Card) = {
@@ -147,6 +158,16 @@ object CardDialog {
     cardText.text = card.getText
     cardColor.value = card.getColor
     cardTags = card.getTagNames
+    card.getDeadline match {
+      case Some(deadline) => {
+        drawDatePicker.disable = false
+        drawDatePicker.value = deadline.getRawDate
+      }
+      case None => {
+        drawDatePicker.disable = true
+        drawDatePicker.value = LocalDate.now()
+      }
+    }
     resetTagEdit()
   }
 
@@ -161,6 +182,14 @@ object CardDialog {
 
   }
 
+  def getDeadline = {
+    if (checkbox.selected()) {
+      Some(new Deadline(drawDatePicker.value()))
+    } else {
+      None
+    }
+  }
+
   def update() = dialog.dialogPane().content = drawContents
 
   dialog.resultConverter = dialogButton =>
@@ -168,13 +197,13 @@ object CardDialog {
       if (cardEditActive) {
         val tags = cardTags.map(kanbanApp.getTag(_))
         tags.foreach(_.addCard(activeCard))
-        activeCard.editCard(cardText.text(), cardColor.getValue, tags)
-        new Card(cardText.text(), cardColor.getValue, tags)
+        activeCard.editCard(cardText.text(), cardColor.getValue, tags, getDeadline)
+        new Card(cardText.text(), cardColor.getValue, tags, getDeadline)
       } else {
         val tags = cardTags.map(kanbanApp.getTag(_))
-        val newCard = activeColumn.addCard(cardText.text(), cardColor.getValue, tags)
+        var newCard = activeColumn.addCard(cardText.text(), cardColor.getValue, tags, getDeadline)
         tags.foreach(_.addCard(newCard))
-        new Card(cardText.text(), cardColor.getValue, tags)
+        new Card(cardText.text(), cardColor.getValue, tags, getDeadline)
       }
 
     } else

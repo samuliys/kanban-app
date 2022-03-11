@@ -11,7 +11,6 @@ import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control.TabPane.TabClosingPolicy
 import scalafx.scene.input._
 import scalafx.scene.paint.Color
-
 import scala.collection.mutable.{Buffer, Map}
 
 
@@ -30,7 +29,7 @@ object Main extends JFXApp {
 
   val kanbanApp = new Kanban
   val fileManager = new FileHandler
-  val noCard = new Card("", Color.Black, Buffer[Tag]())
+  val noCard = new Card("", Color.Black, Buffer[Tag](), None)
   var activeCard = noCard
   var cardActiveStatus = true
 
@@ -39,7 +38,6 @@ object Main extends JFXApp {
   var activeColumn = activeBoard.getColumns.head
 
   var cardMoveActive = false
-
 
   val fontChoice = Font.font("arial", 14)
   val cardSizeWidth = 250
@@ -106,6 +104,12 @@ object Main extends JFXApp {
       textAlignment = TextAlignment.Center
       font = fontChoice
     }
+    card.getDeadline match {
+      case Some(deadline) => {
+        children += new Label(deadline.getString)
+      }
+      case None =>
+    }
 
     if (activeCard == card) {
       children += new HBox(4) {
@@ -125,8 +129,7 @@ object Main extends JFXApp {
         activeColumn = column
         cardMoveActive = true
       }
-
-      stage.scene = new Scene(root)
+      update()
     }
   }
 
@@ -140,7 +143,7 @@ object Main extends JFXApp {
             index = index - 1
           }
           activeColumn.deleteCard(activeCard)
-          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, index)
+          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, activeCard.getDeadline, index)
           update()
           cardMoveActive = false
         }
