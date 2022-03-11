@@ -12,7 +12,6 @@ import java.time.LocalDate
 import scala.collection.mutable.Buffer
 
 object CardDialog {
-
   val dialog = new Dialog[Card]() {
     initOwner(stage)
     title = "Kanban - New Card"
@@ -37,11 +36,8 @@ object CardDialog {
     for (tag <- cardTags) {
       items += new MenuItem(tag) {
         onAction = (event) => {
-          println(tag)
           cardTags.remove(cardTags.indexOf(tag))
-          drawCurrentTags.text = cardTags.mkString(", ")
-          drawAddTag.items = drawAddTagMenuItems
-          drawRemoveTag.items = drawRemoveTagMenuItems
+          resetTagEdit()
         }
       }
     }
@@ -59,9 +55,7 @@ object CardDialog {
         onAction = (event) => {
           println(tag)
           cardTags += tag
-          drawCurrentTags.text = cardTags.mkString(", ")
-          drawAddTag.items = drawAddTagMenuItems
-          drawRemoveTag.items = drawRemoveTagMenuItems
+          resetTagEdit()
         }
       }
     }
@@ -115,14 +109,12 @@ object CardDialog {
         onAction = (event) => {
           TagDialog.reset()
           TagDialog.dialog.showAndWait()
-          drawAddTag.items = drawAddTagMenuItems
           if (cardEditActive) {
             cardTags = activeCard.getTagNames
           } else {
             cardTags = cardTags.filter(kanbanApp.getTagNames.contains(_))
           }
-          drawRemoveTag.items = drawRemoveTagMenuItems
-          drawCurrentTags.text = cardTags.mkString(", ")
+          resetTagEdit()
         }
       }
     }
@@ -145,9 +137,7 @@ object CardDialog {
     cardText.text = ""
     cardColor.value = Color.Black
     cardTags.clear()
-    drawAddTag.items = drawAddTagMenuItems
-    drawRemoveTag.items = drawRemoveTagMenuItems
-    drawCurrentTags.text = cardTags.mkString(", ")
+    resetTagEdit()
   }
 
   def setCardEdit(card: Card) = {
@@ -157,9 +147,18 @@ object CardDialog {
     cardText.text = card.getText
     cardColor.value = card.getColor
     cardTags = card.getTagNames
+    resetTagEdit()
+  }
+
+  def resetTagEdit() = {
     drawAddTag.items = drawAddTagMenuItems
     drawRemoveTag.items = drawRemoveTagMenuItems
-    drawCurrentTags.text = cardTags.mkString(", ")
+    if (cardTags.isEmpty) {
+      drawCurrentTags.text = "No tags"
+    } else {
+      drawCurrentTags.text = cardTags.mkString(", ")
+    }
+
   }
 
   def update() = dialog.dialogPane().content = drawContents

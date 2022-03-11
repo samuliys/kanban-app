@@ -8,8 +8,10 @@ import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.text._
 import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.control.TabPane.TabClosingPolicy
 import scalafx.scene.input._
 import scalafx.scene.paint.Color
+
 import scala.collection.mutable.{Buffer, Map}
 
 
@@ -17,7 +19,7 @@ object Main extends JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "KanbanApp - SY"
     width = 1000
-    height = 700
+    height = 800
   }
 
   var cardEditActive = false
@@ -32,9 +34,9 @@ object Main extends JFXApp {
   var activeCard = noCard
   var cardActiveStatus = true
 
-  var activeBoard = kanbanApp.getBoards
+  var activeBoard = kanbanApp.getBoards.head
 
-  var activeColumn = kanbanApp.getBoards.getColumns.head
+  var activeColumn = activeBoard.getColumns.head
 
   var cardMoveActive = false
 
@@ -44,6 +46,7 @@ object Main extends JFXApp {
   val cardSizeHeight = 100
 
   val currentFilter = Buffer[Tag]()
+
 
   def drawAlert(alertTitle: String, content: String): Alert = {
     new Alert(AlertType.Confirmation) {
@@ -60,6 +63,7 @@ object Main extends JFXApp {
         val result = drawAlert("Delete Card", "Are you sure you want to delete the card?").showAndWait()
         result match {
           case Some(ButtonType.OK) => {
+            card.getTags.foreach(_.removeCard(card))
             column.deleteCard(card)
             update()
           }
@@ -75,8 +79,10 @@ object Main extends JFXApp {
         cardEditActive = true
         CardDialog.setCardEdit(card)
         val result = CardDialog.dialog.showAndWait()
-        update()
         cardEditActive = false
+        activeCard = noCard
+        update()
+
       }
     }
   }
@@ -196,7 +202,7 @@ object Main extends JFXApp {
 
   def drawColumn(board: Board, column: Column): VBox = new VBox {
     alignment = TopCenter
-    minHeight = stage.height.value - 80
+    minHeight = stage.height.value - 146
     minWidth = 280
     border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     children += new Label(column.getName) {
@@ -236,11 +242,17 @@ object Main extends JFXApp {
       font = fontChoice
     }
     items += new Separator
+    items += new Button("Archive") {
+      font = fontChoice
+    }
+    items += new Separator
     items += new MenuButton("Filter") {
       font = fontChoice
       items += new MenuItem("Reset") {
         onAction = (event) => {
           currentFilter.clear()
+          activeCard = noCard
+          cardMoveActive = false
           update()
         }
       }
@@ -249,6 +261,8 @@ object Main extends JFXApp {
       for (tag <- kanbanApp.getTagNames) {
         items += new MenuItem(tag) {
           onAction = (event) => {
+            activeCard = noCard
+            cardMoveActive = false
             val thisTag = kanbanApp.getTag(tag)
             if (currentFilter.contains(thisTag)) {
               currentFilter.remove(currentFilter.indexOf(thisTag))
@@ -268,10 +282,7 @@ object Main extends JFXApp {
         update()
       }
     }
-    items += new Separator
-    items += new Button("Archive") {
-      font = fontChoice
-    }
+
   }
 
   val menubar = new MenuBar {
@@ -286,10 +297,10 @@ object Main extends JFXApp {
         accelerator = new KeyCodeCombination(KeyCode.S, KeyCombination.ControlDown)
       }
       items += new SeparatorMenuItem
-      items += new MenuItem("Exit") {
+      items += new MenuItem("Quit") {
         accelerator = new KeyCodeCombination(KeyCode.Q, KeyCombination.ControlDown)
         onAction = (event) => {
-          val result = drawAlert("Exit", "Are you sure you want to exit?").showAndWait()
+          val result = drawAlert("Quit", "Are you sure you want to quit?").showAndWait()
           result match {
             case Some(ButtonType.OK) => {
               sys.exit(0)
@@ -301,25 +312,52 @@ object Main extends JFXApp {
     }
   }
 
-  def root: VBox = new VBox(8) {
-
-    children += menubar
-    children += toolbar
-
-    children += new HBox(14) {
-      alignment = CenterLeft
-      for (column <- kanbanApp.getBoards.getColumns) {
-        children += drawColumn(activeBoard, column)
-      }
-      children += new Button("New List") {
-        font = fontChoice
-        onAction = (event) => {
-          ColumnDialog.reset()
-          val result = ColumnDialog.dialog.showAndWait()
-          update()
+  def drawBoard(board: Board): Tab = {
+    new Tab {
+      text = board.getName
+      content = new HBox(14) {
+        alignment = CenterLeft
+        for (column <- board.getColumns) {
+          children += drawColumn(board, column)
         }
+        children += new Button("New List") {
+          font = fontChoice
+          onAction = (event) => {
+            activeBoard = board
+            ColumnDialog.reset()
+            val result = ColumnDialog.dialog.showAndWait()
+            update()
+          }
+        }
+
       }
     }
+  }
+
+  def boardTabs: Buffer[Tab] = {
+    val tabs = Buffer[Tab]()
+    for (board <- kanbanApp.getBoards) {
+      tabs += drawBoard(board)
+    }
+    tabs
+  }
+
+  val tabpane = new TabPane {
+    tabClosingPolicy = TabClosingPolicy.Unavailable
+    tabs = boardTabs.toSeq
+  }
+
+  val selectionmodel = tabpane.getSelectionModel
+  var currentSelected = selectionmodel.getSelectedIndex
+
+  def root: VBox = new VBox(8) {
+    currentSelected = selectionmodel.getSelectedIndex
+    children += menubar
+    children += toolbar
+    children += tabpane
+    tabpane.tabs = boardTabs.toSeq
+
+    selectionmodel.select(currentSelected)
   }
 
   def update(): Unit = stage.scene = new Scene(root)
