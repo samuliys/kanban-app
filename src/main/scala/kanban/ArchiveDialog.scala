@@ -94,7 +94,13 @@ object ArchiveDialog {
   val listSelection = new ComboBox(List(""))
 
   val returnCardButton = new Button("Return Selected Cards") {
-
+    onAction = (event) => {
+      val targetColumn = selectedBoard.getColumn(listSelection.value())
+      selectedCards.foreach(targetColumn.addCard(_))
+      selectedCards.foreach(archive.deleteCard(_))
+      selectedCards.clear()
+      update()
+    }
   }
 
   def drawContents = new VBox(10) {

@@ -18,6 +18,12 @@ class Board(private var name: String) {
   def getColumns = this.columns
   def getName = name
 
+  def getColumn(name: String) = {
+    val columnNames = columns.map(_.getName)
+    val index = columnNames.indexOf(name)
+    columns(index)
+  }
+
   def rename(newName: String) = name = newName
 
   def addColumn(name: String = "untitled", color: Color = Color.Black): Column = {
