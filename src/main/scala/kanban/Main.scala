@@ -95,6 +95,7 @@ object Main extends JFXApp {
         column.deleteCard(card)
         activeCard = noCard
         activeColumn = noColumn
+        cardMoveActive = false
         update()
 
       }
@@ -200,6 +201,7 @@ object Main extends JFXApp {
       onAction = (event) => {
         activeColumn = column
         activeCard = noCard
+        cardMoveActive = false
         cardActiveStatus = false
         CardDialog.reset()
         val result = CardDialog.dialog.showAndWait()
@@ -216,6 +218,7 @@ object Main extends JFXApp {
       onAction = (event) => {
         activeColumn = column
         activeCard = noCard
+        cardMoveActive = false
         cardActiveStatus = false
         columnEditActive = true
         ColumnDialog.setColumnEdit(column)
@@ -304,7 +307,6 @@ object Main extends JFXApp {
         activeColumn = noColumn
         cardMoveActive = false
         activeBoard = kanbanApp.getBoards(kanbanApp.getBoardNames.indexOf(value()))
-        println(value())
         update()
       }
     }
