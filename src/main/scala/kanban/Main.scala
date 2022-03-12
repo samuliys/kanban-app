@@ -31,6 +31,7 @@ object Main extends JFXApp {
   val fileManager = new FileHandler
   val noCard = new Card("", Color.Black, Buffer[Tag](), None)
   val noColumn = new Column("", Color.Black)
+
   var activeCard = noCard
   var cardActiveStatus = true
 
@@ -193,7 +194,9 @@ object Main extends JFXApp {
       text = "New Card"
       font = fontChoice
 
-      items += new MenuItem("From Archive") {}
+      items += new MenuItem("From Archive") {
+
+      }
 
       onAction = (event) => {
         activeColumn = column
@@ -282,7 +285,7 @@ object Main extends JFXApp {
       val pane = getPane(column, 20)
       panes(column) += pane.toString()
       children += pane
-      //children += drawCard(column, card)
+
       if (currentFilter.forall(card.getTags.contains(_))) {
         children += drawCard(board, column, card)
       }
@@ -315,6 +318,11 @@ object Main extends JFXApp {
     items += new Separator
     items += new Button("Archive") {
       font = fontChoice
+      onAction = (event) => {
+        ArchiveDialog.reset(activeBoard)
+        val result = ArchiveDialog.dialog.showAndWait()
+        update()
+      }
     }
     items += new Separator
     items += new MenuButton("Filter") {
