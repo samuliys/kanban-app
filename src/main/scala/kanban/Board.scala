@@ -7,10 +7,11 @@ import scala.collection.mutable.Buffer
 
 class Board(private var name: String) {
   private val columns = Buffer[Column]()
-  this.addColumn("List1", Color.Black)
-  this.addColumn("List2", Color.Black)
 
   private val archive = new Column("Archive", Color.Black)
+  archive.getCards.clear()
+  addColumn("list1")
+  addColumn("list2")
 
   def getArchive = archive
 
@@ -19,9 +20,10 @@ class Board(private var name: String) {
 
   def rename(newName: String) = name = newName
 
-  def addColumn(name: String = "untitled", color: Color = Color.Blue) = {
+  def addColumn(name: String = "untitled", color: Color = Color.Black): Column = {
     val column = new Column(name, color)
     columns += column
+    column
   }
 
   def addColumn(column: Column, index: Int) = {

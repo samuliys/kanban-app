@@ -4,7 +4,10 @@ import scalafx.scene.paint.Color
 
 import scala.collection.mutable.Buffer
 
-class Card(private var text: String, private var color: Color, private var tags: Buffer[Tag], private var deadline: Option[Deadline]) {
+class Card(private var text: String,
+           private var color: Color,
+           private val tags: Buffer[String],
+           private var deadline: Option[Deadline]) {
 
   def getText = text
 
@@ -12,16 +15,21 @@ class Card(private var text: String, private var color: Color, private var tags:
 
   def getTags = tags
 
-  def getTagNames = tags.map(_.getName)
+  //def getTagNames = tags.map(_.getName)
 
-  def addTag(tag: Tag) = tags += tag
+  def addTag(tag: String) = tags += tag
 
-  def removeTag(tag: Tag) = tags.remove(tags.indexOf(tag))
+  def removeTag(tag: String) = {
+    if (tags.contains(tag)) {
+      tags.remove(tags.indexOf(tag))
+    }
+  }
 
-  def editCard(newText: String, newColor: Color, newTags: Buffer[Tag], newDeadline: Option[Deadline]) = {
+  def editCard(newText: String, newColor: Color, newTags: Buffer[String], newDeadline: Option[Deadline]) = {
     text = newText
     color = newColor
-    tags = newTags
+    tags.clear()
+    newTags.foreach(tags.append(_))
     deadline = newDeadline
   }
 

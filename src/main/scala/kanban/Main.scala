@@ -29,7 +29,7 @@ object Main extends JFXApp {
 
   val kanbanApp = new Kanban
   val fileManager = new FileHandler
-  val noCard = new Card("", Color.Black, Buffer[Tag](), None)
+  val noCard = new Card("", Color.Black, Buffer[String](), None)
   val noColumn = new Column("", Color.Black)
 
   var activeCard = noCard
@@ -46,7 +46,7 @@ object Main extends JFXApp {
   val cardSizeWidth = 250
   val cardSizeHeight = 100
 
-  val currentFilter = Buffer[Tag]()
+  val currentFilter = Buffer[String]()
 
 
   def drawAlert(alertTitle: String, content: String): Alert = {
@@ -64,7 +64,6 @@ object Main extends JFXApp {
         val result = drawAlert("Delete Card", "Are you sure you want to delete the card?").showAndWait()
         result match {
           case Some(ButtonType.OK) => {
-            card.getTags.foreach(_.removeCard(card))
             column.deleteCard(card)
             update()
           }
@@ -338,17 +337,16 @@ object Main extends JFXApp {
       }
       items += new SeparatorMenuItem
 
-      for (tag <- kanbanApp.getTagNames) {
+      for (tag <- kanbanApp.getTags) {
         items += new MenuItem(tag) {
           onAction = (event) => {
             activeCard = noCard
             activeColumn = noColumn
             cardMoveActive = false
-            val thisTag = kanbanApp.getTag(tag)
-            if (currentFilter.contains(thisTag)) {
-              currentFilter.remove(currentFilter.indexOf(thisTag))
+            if (currentFilter.contains(tag)) {
+              currentFilter.remove(currentFilter.indexOf(tag))
             } else {
-              currentFilter += thisTag
+              currentFilter += tag
             }
             update()
           }
