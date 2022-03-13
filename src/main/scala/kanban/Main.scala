@@ -420,14 +420,21 @@ object Main extends JFXApp {
     }
   }
 
+  val boardPane = new ScrollPane {
+    content = drawBoard(activeBoard)
+  }
+
   def root: VBox = new VBox(8) {
     stage.title = "KanbanApp - " + activeBoard.getName
     children += menubar
     children += toolbar
-    children += drawBoard(activeBoard)
+    children += boardPane
   }
 
-  def update(): Unit = stage.scene = new Scene(root)
+  def update(): Unit = {
+    boardPane.content = drawBoard(activeBoard)
+    stage.title = "KanbanApp - " + activeBoard.getName
+  }
 
   val scene = new Scene(root)
   stage.scene = scene
