@@ -9,6 +9,8 @@ libraryDependencies += "org.scalafx" %% "scalafx" % "14-R19"
 
 // Add dependency on circe library
 libraryDependencies += "io.circe" %% "circe-core" % "0.14.1"
+libraryDependencies += "io.circe" %% "circe-generic" % "0.14.1"
+libraryDependencies += "io.circe" %% "circe-parser" % "0.14.1"
 
 
 // Determine OS version of JavaFX binaries
