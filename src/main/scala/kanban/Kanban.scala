@@ -1,14 +1,15 @@
 package kanban
 
-import scala.collection.mutable.{Buffer, Map}
+import scala.collection.mutable.Buffer
 
+class Kanban(private var name: String = "untitled") {
 
-class Kanban(var name: String = "untitled") {
-  private val tags = Map[String, Tag]()
+  private val tags = Buffer[String]()
   private val boards = Buffer[Board]()
 
-  this.createBoard("board1")
-  this.createBoard("board2")
+  createBoard("board1")
+  createBoard("board2")
+
   addTag("tag1")
   addTag("tag2")
 
@@ -16,26 +17,28 @@ class Kanban(var name: String = "untitled") {
 
   def getName = name
 
-  def getBoards = this.boards
+  def getBoards = boards
 
   def getBoardNames = boards.map(_.getName).toList
 
-  def getTags = tags.values
+  def getTags = tags
 
-  def getTagNames = tags.keys.toBuffer
-
-  def getTag(name: String) = tags(name)
-
-  def createBoard(name: String = "untitled") = {
+  def createBoard(name: String = "untitled"): Board = {
     val board = new Board(name)
     boards += board
+    board
   }
 
-  def addTag(name: String) = tags(name) = new Tag(name)
+  def getBoard(name: String): Board = boards(getBoardNames.indexOf(name))
+
+  def deleteBoard(board: Board) = boards -= board
+
+  def addTag(name: String) = {
+    tags += name
+  }
 
   def removeTag(name: String) = {
-    val tag = tags(name)
-    tag.getTagCards.foreach(_.removeTag(tag))
+    boards.foreach(_.getColumns.foreach(_.getCards.foreach(_.removeTag(name))))
     tags -= name
   }
 }

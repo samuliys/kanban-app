@@ -29,8 +29,9 @@ object Main extends JFXApp {
 
   val kanbanApp = new Kanban
   val fileManager = new FileHandler
-  val noCard = new Card("", Color.Black, Buffer[Tag](), None)
+  val noCard = new Card("", Color.Black, Buffer[String](), None)
   val noColumn = new Column("", Color.Black)
+
   var activeCard = noCard
   var cardActiveStatus = true
 
@@ -45,7 +46,7 @@ object Main extends JFXApp {
   val cardSizeWidth = 250
   val cardSizeHeight = 100
 
-  val currentFilter = Buffer[Tag]()
+  val currentFilter = Buffer[String]()
 
 
   def drawAlert(alertTitle: String, content: String): Alert = {
@@ -63,7 +64,6 @@ object Main extends JFXApp {
         val result = drawAlert("Delete Card", "Are you sure you want to delete the card?").showAndWait()
         result match {
           case Some(ButtonType.OK) => {
-            card.getTags.foreach(_.removeCard(card))
             column.deleteCard(card)
             update()
           }
@@ -95,6 +95,7 @@ object Main extends JFXApp {
         column.deleteCard(card)
         activeCard = noCard
         activeColumn = noColumn
+        cardMoveActive = false
         update()
 
       }
@@ -193,11 +194,14 @@ object Main extends JFXApp {
       text = "New Card"
       font = fontChoice
 
-      items += new MenuItem("From Archive") {}
+      items += new MenuItem("From Archive") {
+
+      }
 
       onAction = (event) => {
         activeColumn = column
         activeCard = noCard
+        cardMoveActive = false
         cardActiveStatus = false
         CardDialog.reset()
         val result = CardDialog.dialog.showAndWait()
@@ -214,6 +218,7 @@ object Main extends JFXApp {
       onAction = (event) => {
         activeColumn = column
         activeCard = noCard
+        cardMoveActive = false
         cardActiveStatus = false
         columnEditActive = true
         ColumnDialog.setColumnEdit(column)
@@ -249,7 +254,7 @@ object Main extends JFXApp {
       border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     }
     alignment = TopCenter
-    minHeight = stage.height.value - 116
+    minHeight = stage.height.value - 120
     minWidth = 280
 
     children += new Label(column.getName) {
@@ -282,7 +287,7 @@ object Main extends JFXApp {
       val pane = getPane(column, 20)
       panes(column) += pane.toString()
       children += pane
-      //children += drawCard(column, card)
+
       if (currentFilter.forall(card.getTags.contains(_))) {
         children += drawCard(board, column, card)
       }
@@ -293,60 +298,107 @@ object Main extends JFXApp {
     children += pane
   }
 
-  def toolbar = new ToolBar {
-    items += new ComboBox(kanbanApp.getBoardNames) {
-      promptText = activeBoard.getName
-      minHeight = 20
+  val filterButton = new MenuButton("Filter") {
+    font = fontChoice
+    items = getFilterItems
+  }
+
+  def getFilterItems = {
+    val items = Buffer[MenuItem]()
+    items += new MenuItem("Reset") {
       onAction = (event) => {
+        currentFilter.clear()
         activeCard = noCard
         activeColumn = noColumn
         cardMoveActive = false
-        activeBoard = kanbanApp.getBoards(kanbanApp.getBoardNames.indexOf(value()))
-        println(value())
         update()
       }
     }
+    items += new SeparatorMenuItem
+
+    for (tag <- kanbanApp.getTags) {
+      items += new MenuItem(tag) {
+        onAction = (event) => {
+          activeCard = noCard
+          activeColumn = noColumn
+          cardMoveActive = false
+          if (currentFilter.contains(tag)) {
+            currentFilter.remove(currentFilter.indexOf(tag))
+          } else {
+            currentFilter += tag
+          }
+          update()
+        }
+      }
+    }
+    items
+  }
+
+  def getFilterText = {
+    if (currentFilter.isEmpty) {
+      ""
+    } else {
+      "   Current filter: " + currentFilter.mkString(", ")
+    }
+
+  }
+
+  val filterLabel = new Label {
+    font = fontChoice
+    text = getFilterText
+  }
+
+  def boardSelectMenuItems: Buffer[MenuItem] = {
+    val items = Buffer[MenuItem]()
+    for (board <- kanbanApp.getBoardNames) {
+      items += new MenuItem(board) {
+        onAction = (event) => {
+          println(board)
+          activeBoard = kanbanApp.getBoard(board)
+          update()
+        }
+      }
+    }
+    items
+  }
+
+  val selectBoardMenu = new MenuButton {
+    text = activeBoard.getName
+    items = boardSelectMenuItems
+  }
+
+  val toolbar = new ToolBar {
+    items += selectBoardMenu
     items += new Button("New Board") {
       font = fontChoice
+      onAction = (event) => {
+        val boardNum = kanbanApp.getBoards.size
+        BoardDialog.reset(kanbanApp, activeBoard, true)
+        BoardDialog.dialog.showAndWait()
+        if (boardNum < kanbanApp.getBoardNames.size) {
+          activeBoard = kanbanApp.getBoards.takeRight(1).head
+        }
+        update()
+      }
     }
     items += new Button("Edit Board") {
       font = fontChoice
+      onAction = (event) => {
+        BoardDialog.reset(kanbanApp, activeBoard, false)
+        val result = BoardDialog.dialog.showAndWait()
+        update()
+      }
     }
     items += new Separator
     items += new Button("Archive") {
       font = fontChoice
+      onAction = (event) => {
+        ArchiveDialog.reset(activeBoard)
+        val result = ArchiveDialog.dialog.showAndWait()
+        update()
+      }
     }
     items += new Separator
-    items += new MenuButton("Filter") {
-      font = fontChoice
-      items += new MenuItem("Reset") {
-        onAction = (event) => {
-          currentFilter.clear()
-          activeCard = noCard
-          activeColumn = noColumn
-          cardMoveActive = false
-          update()
-        }
-      }
-      items += new SeparatorMenuItem
-
-      for (tag <- kanbanApp.getTagNames) {
-        items += new MenuItem(tag) {
-          onAction = (event) => {
-            activeCard = noCard
-            activeColumn = noColumn
-            cardMoveActive = false
-            val thisTag = kanbanApp.getTag(tag)
-            if (currentFilter.contains(thisTag)) {
-              currentFilter.remove(currentFilter.indexOf(thisTag))
-            } else {
-              currentFilter += thisTag
-            }
-            update()
-          }
-        }
-      }
-    }
     items += new Button("Manage Tags") {
       font = fontChoice
       onAction = (event) => {
@@ -355,7 +407,8 @@ object Main extends JFXApp {
         update()
       }
     }
-
+    items += filterButton
+    items += filterLabel
   }
 
   val menubar = new MenuBar {
@@ -412,14 +465,27 @@ object Main extends JFXApp {
     }
   }
 
+  val boardPane = new ScrollPane {
+    content = drawBoard(activeBoard)
+  }
+
   def root: VBox = new VBox(8) {
     stage.title = "KanbanApp - " + activeBoard.getName
     children += menubar
     children += toolbar
-    children += drawBoard(activeBoard)
+    children += boardPane
   }
 
-  def update(): Unit = stage.scene = new Scene(root)
+  def update(): Unit = {
+    boardPane.content = drawBoard(activeBoard)
+    stage.title = "KanbanApp - " + activeBoard.getName
+    filterButton.items = getFilterItems
+    filterLabel.text = getFilterText
+    selectBoardMenu.text = activeBoard.getName
+    selectBoardMenu.items = boardSelectMenuItems
+    //boardCombo.items = ObservableBuffer(kanbanApp.getBoardNames)
+
+  }
 
   val scene = new Scene(root)
   stage.scene = scene
