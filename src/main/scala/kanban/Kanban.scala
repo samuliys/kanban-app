@@ -29,6 +29,10 @@ class Kanban(private var name: String = "untitled") {
     board
   }
 
+  def getBoard(name: String): Board = boards(getBoardNames.indexOf(name))
+
+  def deleteBoard(board: Board) = boards -= board
+
   def addTag(name: String) = {
     tags += name
   }
