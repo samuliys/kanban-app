@@ -11,31 +11,32 @@ import scalafx.scene.paint.Color
 
 object BoardDialog {
 
-  val dialog = new Dialog[Board]() {
+  def showDialog() = dialog.showAndWait()
+
+  private val dialog = new Dialog[Board] {
     initOwner(stage)
     title = "Kanban - Board"
     headerText = "Board"
   }
 
-  var kanbanapp = new Kanban
-  var selectedBoard = new Board("")
-  var newBoard = false
+  private var kanbanapp = new Kanban
+  private var selectedBoard = new Board("")
+  private var newBoard = false
 
-  val okButtonType = new ButtonType("OK", ButtonData.OKDone)
-  //val deleteButtonType = new ButtonType("Delete", ButtonData.Other)
+  private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
 
   dialog.dialogPane().buttonTypes = Seq(okButtonType, ButtonType.Cancel)
 
-  val promptLabel = new Label("Name: ")
+  private val promptLabel = new Label("Name: ")
 
-  val boardName = new TextField() {
+  private val boardName = new TextField() {
     promptText = "Board Name"
   }
 
-  val errorLabel = new Label {
+  private val errorLabel = new Label {
     textFill = Color.Red
   }
-  val deleteBoardButton = new Button("Delete Board") {
+  private val deleteBoardButton = new Button("Delete Board") {
     onAction = (event) => {
       val result = drawAlert("Delete", "Are you sure you want delete board?").showAndWait()
       result match {
@@ -48,7 +49,7 @@ object BoardDialog {
     }
   }
 
-  val deletePane = new Pane {
+  private val deletePane = new Pane {
     children = deleteBoardButton
   }
 
@@ -56,11 +57,14 @@ object BoardDialog {
     if (newValue == "") {
       errorLabel.text = "Board name can't be empty"
       okButton.disable = true
-    } else if (kanbanapp.getBoardNames.contains(newValue)) {
+    } else if (newBoard && kanbanapp.getBoardNames.contains(newValue)) {
+      errorLabel.text = "Board " + newValue + " already exists"
+      okButton.disable = true
+    } else if (!newBoard && kanbanapp.getBoardNames.filterNot(_ == selectedBoard.getName).contains(newValue)) {
       errorLabel.text = "Board " + newValue + " already exists"
       okButton.disable = true
     } else if (newValue.length > 10) {
-      errorLabel.text = "Board name too longs"
+      errorLabel.text = "Board name too long"
       okButton.disable = true
     } else {
       errorLabel.text = ""
@@ -69,8 +73,8 @@ object BoardDialog {
   }
 
 
-  val drawContents = new VBox(10) {
-    minWidth = 300
+  private val drawContents = new VBox(10) {
+    minWidth = 400
     children += new HBox(10) {
       children += promptLabel
       children += boardName
@@ -79,7 +83,7 @@ object BoardDialog {
     children += deletePane
   }
 
-  val okButton = dialog.dialogPane().lookupButton(okButtonType)
+  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   dialog.dialogPane().content = drawContents
 
@@ -91,7 +95,6 @@ object BoardDialog {
     newBoard = isNew
 
     errorLabel.text = ""
-    boardName.text = ""
 
     if (isNew) {
       dialog.title = "Kanban - New Board"
@@ -99,7 +102,6 @@ object BoardDialog {
       okButton.disable = true
       boardName.text = ""
       deletePane.children = new Pane
-      errorLabel.text = ""
 
     } else {
       dialog.title = "Kanban - Board Edit"
@@ -107,19 +109,18 @@ object BoardDialog {
       okButton.disable = false
       boardName.text = board.getName
       deletePane.children = deleteBoardButton
-      errorLabel.text = ""
 
     }
   }
 
-  dialog.resultConverter = dialogButton =>
+  dialog.resultConverter = dialogButton => {
     if (dialogButton == okButtonType) {
       if (newBoard) {
         kanbanapp.createBoard(boardName.text())
       } else {
         selectedBoard.rename(boardName.text())
       }
-      selectedBoard
-    } else
-      null
+    }
+    selectedBoard
+  }
 }

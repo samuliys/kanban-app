@@ -13,20 +13,22 @@ import scala.collection.mutable.Buffer
 
 object ArchiveDialog {
 
-  val dialog = new Dialog {
+  def showDialog() = dialog.showAndWait()
+
+  private val dialog = new Dialog {
     initOwner(stage)
     title = "Kanban - Archive"
     headerText = "Archive"
   }
 
-  val selectedCards = Buffer[Card]()
-  var archive = new Column("", Color.Black)
-  var selectedBoard = new Board("")
+  private val selectedCards = Buffer[Card]()
+  private var archive = new Column("", Color.Black)
+  private var selectedBoard = new Board("")
 
-  val okButtonType = new ButtonType("OK", ButtonData.OKDone)
+  private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
   dialog.dialogPane().buttonTypes = Seq(ButtonType.OK)
 
-  val selectAllButton = new Button("Select All") {
+  private val selectAllButton = new Button("Select All") {
     onAction = (event) => {
       selectedCards.clear()
       archive.getCards.foreach(selectedCards.append(_))
@@ -35,14 +37,14 @@ object ArchiveDialog {
     }
   }
 
-  val unSelectButton = new Button("Remove Selection") {
+  private val unSelectButton = new Button("Remove Selection") {
     onAction = (event) => {
       selectedCards.clear()
       update()
     }
   }
 
-  val deleteSelectedButton = new Button("Delete Selected") {
+  private val deleteSelectedButton = new Button("Delete Selected") {
     onAction = (event) => {
       selectedCards.foreach(archive.deleteCard(_))
       selectedCards.clear()
@@ -50,7 +52,7 @@ object ArchiveDialog {
     }
   }
 
-  def drawCard(card: Card): VBox = {
+  private def drawCard(card: Card): VBox = {
     new VBox(5) {
       if (selectedCards.contains(card)) {
         border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
@@ -79,7 +81,7 @@ object ArchiveDialog {
     }
   }
 
-  def archiveCards: VBox = {
+  private def archiveCards: VBox = {
     new VBox(5) {
       for (card <- archive.getCards) {
         children += drawCard(card)
@@ -87,13 +89,13 @@ object ArchiveDialog {
     }
   }
 
-  val scroll = new ScrollPane {
+  private val scroll = new ScrollPane {
     content = archiveCards
   }
 
-  val listSelection = new ComboBox(List(""))
+  private val listSelection = new ComboBox(List(""))
 
-  val returnCardButton = new Button("Return Selected Cards") {
+  private val returnCardButton = new Button("Return Selected Cards") {
     onAction = (event) => {
       val targetColumn = selectedBoard.getColumn(listSelection.value())
       selectedCards.foreach(targetColumn.addCard(_))
@@ -103,7 +105,7 @@ object ArchiveDialog {
     }
   }
 
-  def drawContents = new VBox(10) {
+  private def drawContents = new VBox(10) {
     minWidth = 300
     children += new HBox(10) {
       children += selectAllButton
@@ -118,7 +120,7 @@ object ArchiveDialog {
     }
   }
 
-  val okButton = dialog.dialogPane().lookupButton(okButtonType)
+  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   dialog.dialogPane().content = drawContents
 
@@ -147,7 +149,7 @@ object ArchiveDialog {
 
   }
 
-  def update(): Unit = {
+  private def update(): Unit = {
     if (selectedCards.isEmpty) {
       unSelectButton.disable = true
       selectAllButton.disable = false
@@ -168,6 +170,5 @@ object ArchiveDialog {
       listSelection.disable = true
     }
     scroll.content = archiveCards
-    println(listSelection.value())
   }
 }
