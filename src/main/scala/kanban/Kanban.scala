@@ -2,16 +2,9 @@ package kanban
 
 import scala.collection.mutable.Buffer
 
-class Kanban(private var name: String = "untitled") {
-
-  private val tags = Buffer[String]()
-  private val boards = Buffer[Board]()
-
-  createBoard("board1")
-  createBoard("board2")
-
-  addTag("tag1")
-  addTag("tag2")
+class Kanban(private var name: String = "untitled",
+             private val boards: Buffer[Board] = Buffer[Board](),
+             private val tags: Buffer[String] = Buffer[String]()) {
 
   def rename(newName: String) = name = newName
 

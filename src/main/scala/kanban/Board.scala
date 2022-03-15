@@ -1,21 +1,17 @@
 package kanban
 
 import scalafx.scene.paint.Color
-
 import scala.collection.mutable.Buffer
 
 
-class Board(private var name: String) {
-  private val columns = Buffer[Column]()
-
-  private val archive = new Column("Archive", Color.Black)
-  archive.getCards.clear()
-  addColumn("list1")
-  addColumn("list2")
+class Board(private var name: String,
+            private val columns: Buffer[Column] = Buffer[Column](),
+            private val archive: Column = new Column("Archive", Color.Black)) {
 
   def getArchive = archive
 
   def getColumns = this.columns
+
   def getName = name
 
   def getColumn(name: String) = {
@@ -39,4 +35,6 @@ class Board(private var name: String) {
   def deleteColumn(column: Column) = {
     columns.remove(columns.indexOf(column))
   }
+
+  def getColumnNames = columns.map(_.getName).toList
 }
