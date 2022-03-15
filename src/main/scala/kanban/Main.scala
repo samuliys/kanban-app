@@ -27,7 +27,12 @@ object Main extends JFXApp {
   val panes = Map[Column, Buffer[String]]()
   val columnPanes = Buffer[String]()
 
-  val kanbanApp = new Kanban
+  var kanbanApp = new Kanban
+
+  kanbanApp.createBoard("board1")
+  kanbanApp.getBoards.head.addColumn("list1", Color.Black)
+  kanbanApp.getBoards.head.getColumns.head.addCard("card1", Color.Green)
+
   val fileManager = new FileHandler
   val noCard = new Card("", Color.Black, Buffer[String](), None)
   val noColumn = new Column("", Color.Black)
@@ -189,13 +194,17 @@ object Main extends JFXApp {
     }
   }
 
-  def drawColumnNewCard(column: Column): SplitMenuButton = {
+  def drawColumnNewCard(board: Board, column: Column): SplitMenuButton = {
     new SplitMenuButton {
       text = "New Card"
       font = fontChoice
 
       items += new MenuItem("From Archive") {
-
+        onAction = (event) => {
+          FromArchiveDialog.reset(board, column)
+          FromArchiveDialog.getDialog.showAndWait()
+          update()
+        }
       }
 
       onAction = (event) => {
@@ -263,7 +272,7 @@ object Main extends JFXApp {
     }
     children += new HBox(2) {
       alignment = Center
-      children += drawColumnNewCard(column)
+      children += drawColumnNewCard(board, column)
       children += drawColumnEdit(column)
       children += drawColumnDelete(board, column)
       children += new Button("Move") {
@@ -329,6 +338,22 @@ object Main extends JFXApp {
           }
           update()
         }
+      }
+    }
+    if (kanbanApp.getTags.isEmpty) getEmptyFilterItems else items
+  }
+
+  def getEmptyFilterItems = {
+    val items = Buffer[MenuItem]()
+    items += new MenuItem("No Filters - Add New") {
+      onAction = (event) => {
+        activeCard = noCard
+        activeColumn = noColumn
+        cardMoveActive = false
+        TagDialog.reset()
+        TagDialog.dialog.showAndWait()
+        update()
+
       }
     }
     items
@@ -418,9 +443,22 @@ object Main extends JFXApp {
       }
       items += new MenuItem("Open") {
         accelerator = new KeyCodeCombination(KeyCode.O, KeyCombination.ControlDown)
+        onAction = (event) => {
+          val result = fileManager.load(kanbanApp)
+          result match {
+            case Some(kanban) => {
+              kanbanApp = kanban
+              fullUpdate()
+            }
+            case None =>
+          }
+        }
       }
       items += new MenuItem("Save") {
         accelerator = new KeyCodeCombination(KeyCode.S, KeyCombination.ControlDown)
+        onAction = (event) => {
+          fileManager.save(kanbanApp)
+        }
       }
       items += new SeparatorMenuItem
       items += new MenuItem("Quit") {
@@ -483,8 +521,17 @@ object Main extends JFXApp {
     filterLabel.text = getFilterText
     selectBoardMenu.text = activeBoard.getName
     selectBoardMenu.items = boardSelectMenuItems
-    //boardCombo.items = ObservableBuffer(kanbanApp.getBoardNames)
+  }
 
+  def fullUpdate(): Unit = {
+    activeCard = noCard
+    cardActiveStatus = true
+    activeBoard = kanbanApp.getBoards.head
+    activeColumn = noColumn
+    columnMove = noColumn
+    cardMoveActive = false
+    currentFilter.clear()
+    update()
   }
 
   val scene = new Scene(root)
