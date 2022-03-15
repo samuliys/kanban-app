@@ -12,7 +12,7 @@ import scala.collection.mutable.Buffer
 
 object FromArchiveDialog {
 
-  def getDialog = dialog
+  def showDialog() = dialog.showAndWait()
 
   private val dialog = new Dialog[Card] {
     initOwner(stage)
