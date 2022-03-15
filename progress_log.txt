@@ -1,6 +1,9 @@
 Progress Log - Samuli Yli-Salomäki 909509
 
+Last Updated 15.3. with Report 1
+
 Report 1: Start-16.3.
+
 I have added classes for the main kanban app (Kanban) and its main components Board, Column and Card.
 These have basic functionality and support adding, removing and editing new cards, columns and boards.
 Archive and tag system have also been implemented and former supports archiving cards and returning cards from archive
