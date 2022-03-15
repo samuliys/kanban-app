@@ -11,7 +11,7 @@ import scalafx.scene.paint.Color
 
 object BoardDialog {
 
-  val dialog = new Dialog[Board]() {
+  val dialog = new Dialog[Board] {
     initOwner(stage)
     title = "Kanban - Board"
     headerText = "Board"
@@ -56,11 +56,14 @@ object BoardDialog {
     if (newValue == "") {
       errorLabel.text = "Board name can't be empty"
       okButton.disable = true
-    } else if (kanbanapp.getBoardNames.contains(newValue)) {
+    } else if (newBoard && kanbanapp.getBoardNames.contains(newValue)) {
+      errorLabel.text = "Board " + newValue + " already exists"
+      okButton.disable = true
+    } else if (!newBoard && kanbanapp.getBoardNames.filterNot(_ == selectedBoard.getName).contains(newValue)) {
       errorLabel.text = "Board " + newValue + " already exists"
       okButton.disable = true
     } else if (newValue.length > 10) {
-      errorLabel.text = "Board name too longs"
+      errorLabel.text = "Board name too long"
       okButton.disable = true
     } else {
       errorLabel.text = ""
@@ -70,7 +73,7 @@ object BoardDialog {
 
 
   val drawContents = new VBox(10) {
-    minWidth = 300
+    minWidth = 400
     children += new HBox(10) {
       children += promptLabel
       children += boardName
@@ -112,14 +115,14 @@ object BoardDialog {
     }
   }
 
-  dialog.resultConverter = dialogButton =>
+  dialog.resultConverter = dialogButton => {
     if (dialogButton == okButtonType) {
       if (newBoard) {
         kanbanapp.createBoard(boardName.text())
       } else {
         selectedBoard.rename(boardName.text())
       }
-      selectedBoard
-    } else
-      null
+    }
+    selectedBoard
+  }
 }
