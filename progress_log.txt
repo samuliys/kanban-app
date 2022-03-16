@@ -1,43 +1,43 @@
 Progress Log - Samuli Yli-Salomäki 909509
 
-Last Updated 15.3. with Report 1
+Päivitetty viimeksi 16.3. väliraportilla 1
 
-Report 1: Start-16.3.
+Väliraportti 1: Alku-16.3.
 
-I have added classes for the main kanban app (Kanban) and its main components Board, Column and Card.
-These have basic functionality and support adding, removing and editing new cards, columns and boards.
-Archive and tag system have also been implemented and former supports archiving cards and returning cards from archive
-and the latter adding and deleting tags and adding and removing them from cards and filtering based on tags.
-Object Main for the GUI has been added. It handles main aspects of the GUI
-and is responsible for displaying instances of the classes mentioned above.
-GUI supports the main functionality of the main classes and also moving cards and filtering based on tags.
+Olen lisännyt luokat itse kanban sovellukselle (Kanban) ja sen pääkomponenteille (Board, Column ja Card).
+Näille on toteuttu perusominaisuudet ja ne tukevat uusien lisäämistä sekä olemassaolevien muokkausta ja poistamista.
+Arkisto ja korttitunnisteet on myös toteutettu. Arkisto tukee korttien arkistointia ja korttien palautusta arkistosta.
+Tunnisteita voidaan lisätä ja poistaa ja niitä voidaan lisätä ja poistaa korteista ja kortteja voidaan suodattaa tunnisteiden perusteella.
+Main on myös luotu ja se vastaa graafisesta käyttöliittymästä ja näyttää graafisesti luokkien oliot.
+Graafinen käyttöliittymä tukee pääluokkien perusominaisuuksia ja korttien/listojen siirtämistä.
 
-The main methods of the classes have been tested so that they work.
-I am constantly testing the GUI (and that also tests the methods of the classes).
-The GUI has the most bugs and needs the most testing and while the biggeset bugs have been fixed
-there are likely still some scenarios I haven't tested. 
+Luokkien päämetodeita on testattu, jotta ne toimivat oikein.
+Olen jatkuvasti testannut graafista käyttöliittymää sitä tehdessäni (ja tämä samalla testaa koko ajan luokkien metodeita).
+Käyttöliittymässä on luultavasti eniten bugeja ja se tarvitsee eniten testausta ja
+vaikka suurimmat bugit on korjattu, on luultavasti monia tilanteita, joita en ole testannut.
 
-My main problem was moving the cards. Originally I tried to implement it by dragging
-but I didn't manage to get the elements to recognise the end of a drag that was started inside a different element.
-I changed it so that moving is done by first clicking a card so that it is active
-and then clicking a space between the cards as the target location.
-At first I also had difficulty in getting aspects of the GUI update when a new card was added for example.
-I fixed this by making the creation of some GUI elements to methods and calling them again after a change was made and that fixed it.
+Suurin ongelmani oli korttien siirtely. Alunperin yritin toteuttaa raahaus-pudotus-menetelmää,
+mutta en onnistunut samaan elementtejä tunnistamaan raahauksen päätepistettä, jos raahaus alkoi toisen elementin sisältä.
+Korjasin ongelman toteuttamalla siirtämisen klikkailemalla, mutta mietin toki miten asian voisi toteutta raahaamalla.
+Alussa ongelmaa oli myös graafisen käyttöliittymän päivittämisessä, kun esim. uusi kortti lisättiin.
+Sain asian korjattua tekemällä osan elementtien luomisesta metodeita ja kutsumalla niitä uudestaan muutosten jälkeen.
+En tiedä, mikä on paras lähestymistapa käyttöliittymän päivitykseen ja onko parempi muokata vain yksittäistä elementtiä
+vai helpommin päivittää koko taulun sisältö aina muutosten yhteydessä.
 
-I have spent quite a lot of hours on the project. Approximately 30 hours have been spent so far.
+Olen käyttänyt projektiin arviolta 30 tuntia tähän mennessä.
 
-Currently I am ahead of schedule. I have managed to implement many features that were supposed to be implemented later in the project plan.
+Olen tällä hetkellä aikataulua edellä. Olen onnistunut saamaan monia ominaisuuksia tehtyä, jotka alunperin piti tehdä vasta myöhemmin.
 
 
-Report 2: 17.3.-30.3.
+Väliraportti 2: 17.3.-30.3.
 
-Report 3: 31.3.-13.4.
+Väliraportti 3: 31.3.-13.4.
 
 
 -----
-Instructions:
-1-3 lines description of what classes have been added or updated and what functionality have been implemented in them (even if they were not ready yet).
-What methods / functionality have been tested so far in classes so that they work properly?
-What possibly difficult errors have occurred and have they been resolved?
-What has been the workload used during this time with some 5 hours accuracy.
-Whether you are ahead or lagging behind what you presented in the project plan (roughly at this phase).
+Ohjeet:
+1-3 rivin kuvaus, mitä luokkia on lisätty tai päivitetty ja mitä toimintoja niissä on saatu toteutettua (vaikka olisi keskenkin).
+Mitä metodeja / toiminnallisuuksia on saatu testattua ko. luokissa, niin että ne toimivat oikein?
+Mitä mahdollisia hankalia virheitä on esiintynyt ja onko niitä saatu ratkaistua?
+Mikä on käytetty työmäärä tänä aikana noin 5 tunnin tarkkuudella.
+Oletko tässä vaiheessa (suurin piirtein) edellä vai jäljessä projektisuunnitelmassa arvioimaasi tilannetta.
