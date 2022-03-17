@@ -1,10 +1,19 @@
 package kanban
 
+import kanban.Main.stage
 import scala.collection.mutable.Buffer
+import scalafx.stage.FileChooser
+import scalafx.stage.FileChooser.ExtensionFilter
 import scalafx.scene.paint.Color
+import java.io.{FileWriter, PrintWriter}
 import java.time.LocalDate
+import scala.io.Source
+import scala.util.Using
 import io.circe._
+import io.circe.parser._
 import io.circe.syntax._
+import scalafx.scene.control.Alert
+import scalafx.scene.control.Alert.AlertType
 
 
 class FileHandler {
@@ -92,10 +101,40 @@ class FileHandler {
   }
 
   def save(kanbanapp: Kanban): Boolean = {
-    ???
+    val fileChooser = new FileChooser {
+      extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json"))
+    }
+    val selectedFile = fileChooser.showSaveDialog(stage)
+    if (selectedFile != null) {
+      val kanbanJson = kanbanapp.asJson.noSpaces
+      val fileWriter = new FileWriter(selectedFile)
+      val printWriter = new PrintWriter(fileWriter)
+      val save = Using(printWriter) {
+        writer => writer.println(kanbanJson)
+      }
+      true
+    } else {
+      false
+    }
   }
 
   def load(oldKanban: Kanban): Option[Kanban] = {
-    ???
+    val fileChooser = new FileChooser {
+      extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json"))
+    }
+    val selectedFile = fileChooser.showOpenDialog(stage)
+    if (selectedFile != null) {
+      val sourceData = Source.fromFile(selectedFile)
+      val kanbanFromFile = Using(sourceData) {
+        source => decode[Kanban](source.getLines().mkString(""))
+      }.toEither.flatten
+      val result = kanbanFromFile.getOrElse(oldKanban)
+      if (result == oldKanban) {
+        new Alert(AlertType.Warning, "Selected File has incorrect json format").showAndWait()
+      }
+      Some(result)
+    } else {
+      None
+    }
   }
 }
