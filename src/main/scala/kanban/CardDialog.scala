@@ -124,7 +124,7 @@ object CardDialog {
       children += new Button("Manage Tags") {
         onAction = (event) => {
           TagDialog.reset(kanbanapp)
-          TagDialog.getDialog.showAndWait()
+          TagDialog.showDialog()
           if (newCard) {
             val correctTags = cardTags.filter(kanbanapp.getTags.contains(_))
             cardTags.clear()
