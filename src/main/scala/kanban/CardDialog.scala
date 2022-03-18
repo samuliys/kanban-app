@@ -7,8 +7,11 @@ import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.paint.Color
-import java.time.LocalDate
+import scalafx.stage.FileChooser
 
+import java.awt.Desktop
+import java.io.File
+import java.time.LocalDate
 import scala.collection.mutable.Buffer
 
 object CardDialog {
@@ -19,6 +22,7 @@ object CardDialog {
   private var selectedColumn = new Column("", Color.Black)
   private var selectedCard = new Card("", Color.Black, Buffer[String](), None)
   private var newCard = false
+  private var selectedFile: Option[File] = None
 
   private val dialog = new Dialog[Card]() {
     initOwner(stage)
@@ -91,6 +95,42 @@ object CardDialog {
     onAction = (event) => checkCheckbox()
   }
 
+  private val fileButton = new Button("Choose File") {
+    onAction = (event) => {
+      val fileChooser = new FileChooser
+      val chooseFile = fileChooser.showOpenDialog(stage)
+
+      if (chooseFile != null) {
+        selectedFile = Some(chooseFile)
+        fileLabel.text = "Chosen file: " + chooseFile.getName
+        openFile.disable = false
+      }
+    }
+  }
+
+  private val removeFileButton = new Button("Remove File") {
+    onAction = (event) => {
+      selectedFile match {
+        case Some(file) => {
+          openFile.disable = true
+          selectedFile = None
+        }
+        case None =>
+      }
+    }
+  }
+
+  private val openFile = new Button("Open File") {
+    onAction = (event) => {
+      selectedFile match {
+        case Some(file) => Desktop.getDesktop.open(file)
+        case None =>
+      }
+    }
+  }
+
+  private val fileLabel = new Label("Chosen File")
+
   private def checkCheckbox(): Unit = {
     drawDatePicker.disable = !checkbox.selected()
   }
@@ -112,6 +152,14 @@ object CardDialog {
       children += checkbox
       children += drawDatePicker
     }
+    children += new Separator
+    children += new HBox(10) {
+      children += new Label("File Attachment: ")
+      children += fileButton
+      children += openFile
+      children += removeFileButton
+    }
+    children += fileLabel
     children += new Separator
     children += new HBox(10) {
       children += new Label("Tags: ")
@@ -169,6 +217,11 @@ object CardDialog {
       cardText.text = card.getText
       cardColor.value = card.getColor
       card.getTags.foreach(cardTags.append(_))
+    }
+
+    selectedFile match {
+      case Some(file) => openFile.disable = false
+      case None => openFile.disable = true
     }
 
     card.getDeadline match {
