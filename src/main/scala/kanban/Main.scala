@@ -12,6 +12,8 @@ import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.input._
 import scalafx.scene.paint.Color
 import javafx.beans.value.ObservableValue
+import scalafx.scene.image.Image
+
 import scala.collection.mutable.{Buffer, Map}
 
 
@@ -58,6 +60,8 @@ object Main extends JFXApp {
 
   val bg = new Background(Array(bgFill))
   val bg2 = new Background(Array(bgFill2))
+
+  def getColorBg(color: Color): Background = new Background(Array(new BackgroundFill(color, CornerRadii.Empty, Insets.Empty)))
 
 
   def drawAlert(alertTitle: String, content: String): Alert = {
@@ -260,6 +264,9 @@ object Main extends JFXApp {
     minWidth = 280
 
     children += new Label(column.getName) {
+      background = getColorBg(Color.White)
+      alignment = Center
+      minWidth = 280
       minHeight = 40
       font = Font.font("arial", 20)
     }
@@ -476,7 +483,16 @@ object Main extends JFXApp {
 
   def drawBoard(board: Board): HBox = {
     new HBox() {
-      background = bg
+      board.getBgImage match {
+        case Some(file) => {
+          val img = new Image(file.toURI.toString)
+          val bgImg = new BackgroundImage(img, BackgroundRepeat.Repeat, BackgroundRepeat.Repeat,
+            BackgroundPosition.Default, BackgroundSize.Default)
+          background = new Background(Array(bgImg))
+        }
+        case None => background = getColorBg(board.getColor)
+      }
+
       alignment = CenterLeft
       columnPanes.clear()
       for (column <- board.getColumns) {

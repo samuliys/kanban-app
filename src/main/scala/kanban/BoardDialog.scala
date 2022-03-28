@@ -155,6 +155,7 @@ object BoardDialog {
   def reset(kanban: Kanban, board: Board, isNew: Boolean) = {
     kanbanapp = kanban
     selectedBoard = board
+    selectedFile = None
     newBoard = isNew
 
     if (isNew) {
@@ -165,7 +166,8 @@ object BoardDialog {
       deletePane.children = new Pane
       radio1.selected = true
       boardColor.value = Color.White
-      boardColor.disable = true
+      boardColor.disable = false
+      fileLabel.text = ""
 
     } else {
       dialog.title = "Kanban - Board Edit"
