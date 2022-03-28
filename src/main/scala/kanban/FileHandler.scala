@@ -1,11 +1,13 @@
 package kanban
 
 import kanban.Main.stage
+
 import scala.collection.mutable.Buffer
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
 import scalafx.scene.paint.Color
-import java.io.{FileWriter, PrintWriter}
+
+import java.io.{File, FileWriter, PrintWriter}
 import java.time.LocalDate
 import scala.io.Source
 import scala.util.Using
@@ -32,18 +34,32 @@ class FileHandler {
     new Kanban(name, boards, tags)
   }
 
+  implicit val encodeFile: Encoder[File] = (a: File) => Json.obj(
+    ("file", a.getAbsolutePath.asJson),
+  )
+
+  implicit val decodeFile: Decoder[File] = (c: HCursor) => for {
+    file <- c.downField("file").as[String]
+  } yield {
+    new File(file)
+  }
+
   implicit val encodeBoard: Encoder[Board] = (a: Board) => Json.obj(
     ("name", a.getName.asJson),
+    ("color", a.getColor.asJson),
+    ("image", a.getBgImage.asJson),
     ("columns", a.getColumns.asJson),
     ("archive", a.getArchive.asJson)
   )
 
   implicit val decodeBoard: Decoder[Board] = (c: HCursor) => for {
     name <- c.downField("name").as[String]
+    color <- c.downField("color").as[Color]
+    image <- c.downField("image").as[Option[File]]
     columns <- c.downField("columns").as[Buffer[Column]]
     archive <- c.downField("archive").as[Column]
   } yield {
-    new Board(name, columns, archive)
+    new Board(name, color, image, columns, archive)
   }
 
   implicit val encodeColumn: Encoder[Column] = (a: Column) => Json.obj(
