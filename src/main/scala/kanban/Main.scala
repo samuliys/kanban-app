@@ -1,8 +1,9 @@
 package kanban
 
-import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.geometry.Pos._
+import scalafx.Includes._
+import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.layout._
 import scalafx.scene.control._
@@ -10,6 +11,7 @@ import scalafx.scene.text._
 import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.input._
 import scalafx.scene.paint.Color
+import javafx.beans.value.ObservableValue
 import scala.collection.mutable.{Buffer, Map}
 
 
@@ -50,6 +52,12 @@ object Main extends JFXApp {
   val cardSizeHeight = 100
 
   val currentFilter = Buffer[String]()
+
+  val bgFill = new BackgroundFill(Color.Orange, CornerRadii.Empty, Insets.Empty)
+  val bgFill2 = new BackgroundFill(Color.White, new CornerRadii(6), Insets.Empty)
+
+  val bg = new Background(Array(bgFill))
+  val bg2 = new Background(Array(bgFill2))
 
 
   def drawAlert(alertTitle: String, content: String): Alert = {
@@ -103,7 +111,7 @@ object Main extends JFXApp {
   }
 
   def drawCard(board: Board, column: Column, card: Card): VBox = new VBox(4) {
-
+    background = bg2
     if (activeCard == card) {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
     } else {
@@ -242,7 +250,6 @@ object Main extends JFXApp {
   }
 
   def drawColumn(board: Board, column: Column): VBox = new VBox {
-
     if (columnMove == column) {
       border = new Border(new BorderStroke(column.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
     } else {
@@ -397,6 +404,15 @@ object Main extends JFXApp {
       }
     }
     items += new Separator
+    items += new Button("New List") {
+      font = fontChoice
+      onAction = (event) => {
+        ColumnDialog.reset(activeBoard, activeColumn, true)
+        ColumnDialog.showDialog()
+        update()
+      }
+    }
+    items += new Separator
     items += new Button("Archive") {
       font = fontChoice
       onAction = (event) => {
@@ -460,6 +476,7 @@ object Main extends JFXApp {
 
   def drawBoard(board: Board): HBox = {
     new HBox() {
+      background = bg
       alignment = CenterLeft
       columnPanes.clear()
       for (column <- board.getColumns) {
@@ -472,16 +489,6 @@ object Main extends JFXApp {
       val pane = getColumnPane(board, 100)
       columnPanes += pane.toString()
       children += pane
-
-      children += new Button("New List") {
-        font = fontChoice
-        onAction = (event) => {
-          activeBoard = board
-          ColumnDialog.reset(board, activeColumn, true)
-          ColumnDialog.showDialog()
-          update()
-        }
-      }
     }
   }
 
@@ -516,5 +523,14 @@ object Main extends JFXApp {
 
   val scene = new Scene(root)
   stage.scene = scene
+  scene.setFill(Color.Transparent)
+
+  stage.heightProperty.addListener { (obs: ObservableValue[_ <: Number], oldVal: Number, newVal: Number) =>
+    update()
+  }
+
+  stage.widthProperty.addListener { (obs: ObservableValue[_ <: Number], oldVal: Number, newVal: Number) =>
+    update()
+  }
 
 }
