@@ -318,9 +318,19 @@ object CardDialog {
       cardText.text = card.getText
       cardColor.value = card.getColor
       card.getTags.foreach(cardTags.append(_))
-      selectedFile = card.getFile
       tasks = card.getChecklist.getTasks
       checklist.setTasks(card.getChecklist.getTasks)
+
+      card.getFile match {
+        case Some(file) => {
+          if (file.canRead) {
+            selectedFile = Some(file)
+          } else {
+            selectedFile = None
+          }
+        }
+        case None => selectedFile = None
+      }
     }
     taskRemoveMenu.items = ObservableBuffer(getTaskList)
 
@@ -389,7 +399,7 @@ object CardDialog {
       if (newCard) {
         selectedColumn.addCard(cardText.text(), cardColor.getValue, cardTags, checklist, getDeadline)
       } else {
-        selectedCard.editCard(cardText.text(), cardColor.getValue, cardTags, checklist, getDeadline, None)
+        selectedCard.editCard(cardText.text(), cardColor.getValue, cardTags, checklist, getDeadline, selectedFile)
       }
     }
     selectedCard
