@@ -7,10 +7,10 @@ import scala.collection.mutable.Buffer
 
 class Card(private var text: String,
            private var color: Color,
-           private var tags: Buffer[String],
+           private var tags: Buffer[String] = Buffer[String](),
            private var checklist: Checklist = new Checklist,
-           private var deadline: Option[Deadline],
-           private var file: Option[File]) {
+           private var deadline: Option[Deadline] = None,
+           private var file: Option[File] = None) {
 
   def getText = text
 
@@ -42,4 +42,6 @@ class Card(private var text: String,
   def getDeadline = deadline
 
   def getFile = file
+
+  def resetFile() = file = None
 }

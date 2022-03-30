@@ -36,4 +36,6 @@ class Kanban(private var name: String = "untitled",
     boards.foreach(_.getColumns.foreach(_.getCards.foreach(_.removeTag(name))))
     tags -= name
   }
+
+  def getAllCards = boards.flatMap(_.getColumns.flatMap(_.getCards))
 }
