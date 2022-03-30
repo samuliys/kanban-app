@@ -13,6 +13,7 @@ import scalafx.scene.input._
 import scalafx.scene.paint.Color
 import javafx.beans.value.ObservableValue
 import scalafx.scene.image.Image
+import scalafx.scene.shape.StrokeType
 
 import scala.collection.mutable.{Buffer, Map}
 
@@ -39,7 +40,7 @@ object Main extends JFXApp {
 
   val fileManager = new FileHandler
 
-  val noCard = new Card("", Color.Black, Buffer[String](), None)
+  val noCard = new Card("", Color.Black, Buffer[String](), new Checklist, None, None)
   val noColumn = new Column("", Color.Black)
 
   var activeCard = noCard
@@ -49,11 +50,13 @@ object Main extends JFXApp {
   var activeColumn = noColumn
   var columnMove = noColumn
 
-  val fontChoice = Font.font("arial", 14)
-  val cardSizeWidth = 250
-  val cardSizeHeight = 100
+  val fontChoice = Font.font("arial", 13)
 
   val currentFilter = Buffer[String]()
+
+  private val CARD_WIDTH = 310
+  private val CARD_HEIGHT = 120
+  private val COLUMN_WIDTH = 330
 
   val bgFill = new BackgroundFill(Color.Orange, CornerRadii.Empty, Insets.Empty)
   val bgFill2 = new BackgroundFill(Color.White, new CornerRadii(6), Insets.Empty)
@@ -122,10 +125,10 @@ object Main extends JFXApp {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     }
 
-    minWidth = cardSizeWidth
-    maxWidth = cardSizeWidth
-    minHeight = cardSizeHeight
-    maxHeight = cardSizeHeight
+    minWidth = CARD_WIDTH
+    maxWidth = CARD_WIDTH
+    minHeight = CARD_HEIGHT
+    maxHeight = CARD_HEIGHT
 
     alignment = Center
     children += new Label(card.getText) {
@@ -138,6 +141,27 @@ object Main extends JFXApp {
         children += new Label(deadline.getString)
       }
       case None =>
+    }
+
+    if (card.getChecklist.hasTasks) {
+      children += new Label(card.getChecklist.toString)
+      children += new ProgressBar {
+        progress = card.getChecklist.getProgress
+        minHeight = 20
+        minWidth = 150
+
+      }
+      for (task <- card.getChecklist.getTasks) {
+        children += new CheckBox() {
+          text = task._2
+          selected = task._1
+          onAction = (event) => {
+            card.getChecklist.toggleStatus(task._2)
+            update()
+          }
+        }
+      }
+
     }
 
     if (activeCard == card) {
@@ -188,10 +212,11 @@ object Main extends JFXApp {
         var index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
         if (index != -1 && activeCard != noCard) {
           if (activeColumn == column && column.getCards.indexOf(activeCard) < index) {
-            index = index - 1
+            index = (index - 1) max 0
           }
+          println(index)
           activeColumn.deleteCard(activeCard)
-          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, activeCard.getDeadline, index)
+          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, activeCard.getChecklist, activeCard.getDeadline, index)
           update()
         }
       }
@@ -261,16 +286,9 @@ object Main extends JFXApp {
     }
     alignment = TopCenter
     minHeight = stage.height.value - 120
-    minWidth = 280
+    minWidth = COLUMN_WIDTH
 
-    children += new Label(column.getName) {
-      background = getColorBg(Color.White)
-      alignment = Center
-      minWidth = 280
-      minHeight = 40
-      font = Font.font("arial", 20)
-    }
-    children += new HBox(2) {
+    children += new HBox(12) {
       alignment = Center
       children += drawColumnNewCard(board, column)
       children += drawColumnEdit(board, column)
@@ -288,7 +306,26 @@ object Main extends JFXApp {
         }
       }
     }
-    children += new Separator
+
+/*    children += new Label(column.getName) {
+      background = getColorBg(Color.White)
+      alignment = BottomCenter
+      minWidth = 280
+      minHeight = 35
+
+      font = Font.font("arial", 20)
+
+    }*/
+    children += new Text {
+      text = column.getName
+      font = Font.font("arial", 26)
+      //minHeight = 35
+      fill = Color.Black
+      stroke = Color.White
+      strokeType = StrokeType.Outside
+      strokeWidth = 1
+    }
+    //children += new Separator
 
     panes(column) = Buffer[String]()
     for (card <- column.getCards) {
@@ -502,10 +539,17 @@ object Main extends JFXApp {
         children += drawColumn(board, column)
       }
 
-      val pane = getColumnPane(board, 100)
+      val pane = getColumnPane(board, calculateWidth(board))
       columnPanes += pane.toString()
       children += pane
+
+
     }
+  }
+
+  def calculateWidth(board: Board) = {
+    val amount = board.getColumns.size
+    (stage.width() - amount * COLUMN_WIDTH - amount * 20 - 20).toInt
   }
 
   val boardPane = new ScrollPane {
@@ -540,6 +584,7 @@ object Main extends JFXApp {
   val scene = new Scene(root)
   stage.scene = scene
   scene.setFill(Color.Transparent)
+  stage.centerOnScreen()
 
   stage.heightProperty.addListener { (obs: ObservableValue[_ <: Number], oldVal: Number, newVal: Number) =>
     update()
