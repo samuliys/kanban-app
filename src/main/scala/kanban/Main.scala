@@ -122,13 +122,13 @@ object Main extends JFXApp {
     if (activeCard == card) {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
     } else {
+      maxHeight = CARD_HEIGHT
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
     }
 
     minWidth = CARD_WIDTH
     maxWidth = CARD_WIDTH
     minHeight = CARD_HEIGHT
-    maxHeight = CARD_HEIGHT
 
     alignment = Center
     children += new Label(card.getText) {
@@ -151,16 +151,27 @@ object Main extends JFXApp {
         minWidth = 150
 
       }
-      for (task <- card.getChecklist.getTasks) {
-        children += new CheckBox() {
-          text = task._2
-          selected = task._1
-          onAction = (event) => {
-            card.getChecklist.toggleStatus(task._2)
-            update()
+      if (activeCard == card) {
+        children += new HBox {
+          children += new Pane {
+            minWidth = 20
+          }
+          children += new VBox(2) {
+            for (task <- card.getChecklist.getTasks) {
+              children += new CheckBox() {
+                text = task._2
+                selected = task._1
+                onAction = (event) => {
+                  card.getChecklist.toggleStatus(task._2)
+                  update()
+                }
+              }
+            }
           }
         }
+
       }
+
 
     }
 
@@ -306,16 +317,9 @@ object Main extends JFXApp {
         }
       }
     }
-
-/*    children += new Label(column.getName) {
-      background = getColorBg(Color.White)
-      alignment = BottomCenter
-      minWidth = 280
-      minHeight = 35
-
-      font = Font.font("arial", 20)
-
-    }*/
+    children += new Pane {
+       minHeight = 10
+    }
     children += new Text {
       text = column.getName
       font = Font.font("arial", 26)
@@ -325,7 +329,6 @@ object Main extends JFXApp {
       strokeType = StrokeType.Outside
       strokeWidth = 1
     }
-    //children += new Separator
 
     panes(column) = Buffer[String]()
     for (card <- column.getCards) {
@@ -522,7 +525,8 @@ object Main extends JFXApp {
     new HBox() {
       board.getBgImage match {
         case Some(file) => {
-          val img = new Image(file.toURI.toString)
+          val img = new Image(file.toURI.toString) //, stage.width(), stage.height(), true, true)
+
           val bgImg = new BackgroundImage(img, BackgroundRepeat.Repeat, BackgroundRepeat.Repeat,
             BackgroundPosition.Default, BackgroundSize.Default)
           background = new Background(Array(bgImg))
