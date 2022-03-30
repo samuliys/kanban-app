@@ -15,6 +15,7 @@ import javafx.beans.value.ObservableValue
 import scalafx.scene.image.Image
 import scalafx.scene.shape.StrokeType
 
+import java.awt.Desktop
 import scala.collection.mutable.{Buffer, Map}
 
 
@@ -169,10 +170,27 @@ object Main extends JFXApp {
             }
           }
         }
-
       }
-
-
+    }
+    card.getFile match {
+      case Some(file) => {
+        if (activeCard == card) {
+          children += new HBox(3) {
+            alignment = Center
+            children += new Label("File: " + file.getName)
+            children += new Button("Open File") {
+              onAction = (event) => {
+                if (file.canRead) {
+                  Desktop.getDesktop.open(file)
+                }
+              }
+            }
+          }
+        } else {
+          children += new Label("File Attachment: " + file.getName)
+        }
+      }
+      case None =>
     }
 
     if (activeCard == card) {
@@ -567,6 +585,20 @@ object Main extends JFXApp {
     children += boardPane
   }
 
+  def checkFiles() = {
+    for (card <- kanbanApp.getAllCards.filter(_.getFile.isDefined)) {
+      card.getFile match {
+        case Some(file) => {
+          println("fadssdf")
+          if (!file.canRead) {
+            card.resetFile()
+          }
+        }
+        case None =>
+      }
+    }
+  }
+
   def update(): Unit = {
     boardPane.content = drawBoard(activeBoard)
     stage.title = "KanbanApp - " + activeBoard.getName
@@ -582,6 +614,7 @@ object Main extends JFXApp {
     activeColumn = noColumn
     columnMove = noColumn
     currentFilter.clear()
+    checkFiles()
     update()
   }
 
