@@ -21,7 +21,7 @@ class Deadline(private val date: LocalDate) {
     } else if (daysUntil == 0) {
       "Due today"
     } else {
-      s"Due $daysUntilString days ago"
+      s"Due ${daysUntil.abs.toInt.toString} days ago"
     }
   }
 }
