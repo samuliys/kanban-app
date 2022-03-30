@@ -1,6 +1,33 @@
 Progress Log - Samuli Yli-Salomäki 909509
 
-Päivitetty viimeksi 16.3. väliraportilla 1
+Päivitetty viimeksi 30.3. väliraportilla 2
+
+Väliraportti 2: 17.3.-30.3.
+
+Uusia ominaisuuksia varten on luotu luokat Deadline, joka vastaa kortin aikarajoitteesta
+sekä Checklist, joka mahdollistaa useiden tehtävien laittamisen kortille.
+Näistä ensimmäinen toimii jossain muodossa, jälkimmäisen toteutus on vielä kesken.
+Näitä varten käyttöliittymään on lisätty uusia elementtejä, jotta näitä voidaan kortteihin lisätä.
+FileHandler luokkaan on toteutettu circe-kirjastoa käyttäen luokkien json koodekit
+sekä näitä hyödyntäen metodit tiedostoon tallentamista ja siitä lukemista varten.
+Monia perusluokkia on muutettu, jotta tiedostoon saadaan tieto talteen.
+Lisäksi on luotu abstrakti luokka Dialog, jonka alle muut käyttöliittymän dialog oliot tulevat.
+Tämän lisäksi on lisätty mahdollisuus lisätä laudalle taustakuva (väri tai kuva).
+
+Monia uusia ominmaisuuksia on testattu, jotta ne toimivat perusmuodossaan. Näin on esimerkiksi DL-ominaisuuden
+sekä laudan taustakuvan kanssa. Nämä vaativat kuitenkin edelleen testausta, jotta erilaisiin käyttäjävirheisiin varaudutaan
+ja kaikki bugit saadaan korjattua.
+Tiedostoon tallennus ja korttien liitetiedostojen käsittely toimii ainakin yksinkertaisissa tilanteissa,
+mutta vaatii huomattavasti lisää testausta, jotta kaikkiin mahdollisiin tilanteiseen varaudutaan.
+
+Tiedostoon liittyi ongelmia, mutta ne on pääosin saatu ratkaistua.
+ScalaFX:n taustakuva-ominaisuuden kanssa oli myös ongelmia, mutta se on nyt saatu toimimaan.
+
+Käytetty työmäärä oli noin 15 tuntia.
+
+Kiireiden takia en ole saanut niin paljon aikaiseksi kuin oli tarkoitus, mutta ensimmäisen kahden viikon suuren edistyksen ansiosta
+uskon olevani suurin piirtein aikataulussa ja oletan, että saan tarvittavat ominaisuudet ajoissa toteutettua.
+
 
 Väliraportti 1: Alku-16.3.
 
@@ -29,7 +56,7 @@ Olen käyttänyt projektiin arviolta 30 tuntia tähän mennessä.
 Olen tällä hetkellä aikataulua edellä. Olen onnistunut saamaan monia ominaisuuksia tehtyä, jotka alunperin piti tehdä vasta myöhemmin.
 
 
-Väliraportti 2: 17.3.-30.3.
+
 
 Väliraportti 3: 31.3.-13.4.
 
