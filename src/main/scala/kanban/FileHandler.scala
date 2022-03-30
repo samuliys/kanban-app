@@ -39,9 +39,9 @@ class FileHandler {
   )
 
   implicit val decodeFile: Decoder[File] = (c: HCursor) => for {
-    file <- c.downField("file").as[String]
+    path <- c.downField("file").as[String]
   } yield {
-    new File(file)
+    new File(path)
   }
 
   implicit val encodeBoard: Encoder[Board] = (a: Board) => Json.obj(
@@ -100,20 +100,34 @@ class FileHandler {
     Color.color(red, green, blue)
   }
 
+  implicit val encodeChecklist: Encoder[Checklist] = (a: Checklist) => Json.obj(
+    ("tasks", a.getTasks.asJson)
+  )
+
+  implicit val decodeChecklist: Decoder[Checklist] = (c: HCursor) => for {
+    tasks <- c.downField("tasks").as[Buffer[(Boolean, String)]]
+  } yield {
+    new Checklist(tasks)
+  }
+
   implicit val encodeCard: Encoder[Card] = (a: Card) => Json.obj(
     ("text", a.getText.asJson),
     ("color", a.getColor.asJson),
     ("tags", a.getTags.asJson),
-    ("deadline", a.getDeadline.asJson)
+    ("checklist", a.getChecklist.asJson),
+    ("deadline", a.getDeadline.asJson),
+    ("file", a.getFile.asJson)
   )
 
   implicit val decodeCard: Decoder[Card] = (c: HCursor) => for {
     text <- c.downField("text").as[String]
     color <- c.downField("color").as[Color]
     tags <- c.downField("tags").as[Buffer[String]]
+    checklist <- c.downField("checklist").as[Checklist]
     deadline <- c.downField("deadline").as[Option[Deadline]]
+    file <- c.downField("file").as[Option[File]]
   } yield {
-    new Card(text, color, tags, deadline)
+    new Card(text, color, tags, checklist, deadline, file)
   }
 
   def save(kanbanapp: Kanban): Boolean = {
