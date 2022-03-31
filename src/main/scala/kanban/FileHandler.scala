@@ -110,13 +110,26 @@ class FileHandler {
     new Checklist(tasks)
   }
 
+  implicit val encodeSubCard: Encoder[SubCard] = (a: SubCard) => Json.obj(
+    ("text", a.getText.asJson),
+    ("color", a.getColor.asJson)
+  )
+
+  implicit val decodeSubCard: Decoder[SubCard] = (c: HCursor) => for {
+    text <- c.downField("text").as[String]
+    color <- c.downField("color").as[Color]
+  } yield {
+    new SubCard(text, color)
+  }
+
   implicit val encodeCard: Encoder[Card] = (a: Card) => Json.obj(
     ("text", a.getText.asJson),
     ("color", a.getColor.asJson),
     ("tags", a.getTags.asJson),
     ("checklist", a.getChecklist.asJson),
     ("deadline", a.getDeadline.asJson),
-    ("file", a.getFile.asJson)
+    ("file", a.getFile.asJson),
+    ("subcard", a.getSubcard.asJson)
   )
 
   implicit val decodeCard: Decoder[Card] = (c: HCursor) => for {
@@ -126,8 +139,9 @@ class FileHandler {
     checklist <- c.downField("checklist").as[Checklist]
     deadline <- c.downField("deadline").as[Option[Deadline]]
     file <- c.downField("file").as[Option[File]]
+    subcard <- c.downField("subcard").as[Option[SubCard]]
   } yield {
-    new Card(text, color, tags, checklist, deadline, file)
+    new Card(text, color, tags, checklist, deadline, file, subcard)
   }
 
   def save(kanbanapp: Kanban): Boolean = {
