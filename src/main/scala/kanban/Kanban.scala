@@ -38,4 +38,17 @@ class Kanban(private var name: String = "untitled",
   }
 
   def getAllCards = boards.flatMap(_.getColumns.flatMap(_.getCards))
+
+  def checkFiles() = {
+    for (card <- getAllCards.filter(_.getFile.isDefined)) {
+      card.getFile match {
+        case Some(file) => {
+          if (!file.canRead) {
+            card.resetFile()
+          }
+        }
+        case None =>
+      }
+    }
+  }
 }
