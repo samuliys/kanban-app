@@ -1,5 +1,7 @@
 package kanban
 
+import scalafx.scene.paint.Color
+
 import scala.collection.mutable.Buffer
 
 class Checklist(private var tasks: Buffer[(Boolean, String)] = Buffer[(Boolean, String)]()) {
@@ -24,9 +26,22 @@ class Checklist(private var tasks: Buffer[(Boolean, String)] = Buffer[(Boolean, 
 
   def resetTasks() = tasks.clear()
 
+  def allComplete = tasks.count(_._1) == tasks.size
+
   def setTasks(newTasks: Buffer[(Boolean, String)]) = tasks = newTasks
 
   def hasTasks = tasks.nonEmpty
+
+  def getCorrectColor(isLate: Boolean) = {
+    if (allComplete) {
+      Color.Green
+    } else if (isLate) {
+      Color.Red
+    } else {
+      Color.Black
+    }
+
+  }
 
   override def toString: String = s"${tasks.count(_._1)} / ${tasks.size} completed"
 
