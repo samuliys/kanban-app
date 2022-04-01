@@ -1,29 +1,29 @@
 package kanban
 
 import scalafx.scene.paint.Color
+
+import java.io.File
 import scala.collection.mutable.Buffer
 
 
-class Column(private var name: String,
-             private var color: Color,
+class Column(private var name: String = "",
+             private var color: Color = Color.Black,
              private val cards: Buffer[Card] = Buffer[Card]()) {
-
-  def getCards = this.cards
 
   def getName = name
 
   def getColor = color
 
+  def getCards = cards
+
   def rename(newName: String) = name = newName
 
-  def addCard(name: String, color: Color, tags: Buffer[String] = Buffer[String](), deadline: Option[Deadline] = None, index: Int = cards.size): Card = {
-    val card = new Card(name, color, tags, deadline)
-    cards.insert(index, card)
-    card
+  def addNewCard(text: String, color: Color, tags: Buffer[String], checklist: Checklist, deadline: Option[Deadline], file: Option[File], subCard: Option[SubCard] = None) = {
+    cards += new Card(text, color, tags, checklist, deadline, file, subCard)
   }
 
-  def addCard(card: Card) = {
-    cards.insert(0, card)
+  def addCard(card: Card, index: Int = 0) = {
+    cards.insert(index, card)
   }
 
   def deleteCard(card: Card) = {
