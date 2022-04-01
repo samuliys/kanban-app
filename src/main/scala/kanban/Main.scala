@@ -1,9 +1,6 @@
 package kanban
 
 import scalafx.application.JFXApp
-import scalafx.geometry.Pos._
-import scalafx.Includes._
-import scalafx.geometry.Insets
 import scalafx.scene.Scene
 import scalafx.scene.layout._
 import scalafx.scene.control._
@@ -11,10 +8,12 @@ import scalafx.scene.text._
 import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.input._
 import scalafx.scene.paint.Color
-import javafx.beans.value.ObservableValue
 import scalafx.scene.image.Image
 import scalafx.scene.shape.StrokeType
-
+import scalafx.geometry.Pos._
+import scalafx.geometry.Insets
+import scalafx.Includes._
+import javafx.beans.value.ObservableValue
 import java.awt.Desktop
 import scala.collection.mutable.{Buffer, Map}
 
@@ -37,21 +36,21 @@ object Main extends JFXApp {
 
   kanbanApp.createBoard("board1")
   kanbanApp.getBoards.head.addColumn("list1", Color.Black)
-  kanbanApp.getBoards.head.getColumns.head.addCard("card1", Color.Green)
+  kanbanApp.getBoards.head.getColumns.head.addCard(new Card("card1", Color.LightBlue))
 
   val fileManager = new FileHandler
 
-  val noCard = new Card("", Color.Black, Buffer[String](), new Checklist, None, None)
   val noColumn = new Column("", Color.Black)
 
-  var activeCard = noCard
+  var activeCard: Option[Card] = None
 
   var activeBoard = kanbanApp.getBoards.head
 
   var activeColumn = noColumn
   var columnMove = noColumn
 
-  val fontChoice = Font.font("arial", 13)
+  val defaultFont = Font.font("arial", 13)
+  val cardTextFont = Font.font("arial", 15)
 
   val currentFilter = Buffer[String]()
 
@@ -97,7 +96,7 @@ object Main extends JFXApp {
       onAction = (event) => {
         CardDialog.reset(kanbanApp, column, card, false)
         CardDialog.showDialog()
-        activeCard = noCard
+        activeCard = None
         activeColumn = noColumn
         update()
 
@@ -110,7 +109,7 @@ object Main extends JFXApp {
       onAction = (event) => {
         board.getArchive.addCard(card)
         column.deleteCard(card)
-        activeCard = noCard
+        activeCard = None
         activeColumn = noColumn
         update()
 
@@ -120,7 +119,7 @@ object Main extends JFXApp {
 
   def drawCard(board: Board, column: Column, card: Card): VBox = new VBox(4) {
     background = bg2
-    if (activeCard == card) {
+    if (activeCard.getOrElse(BlankCard) == card) {
       border = new Border(new BorderStroke(card.getColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
     } else {
       maxHeight = CARD_HEIGHT
@@ -135,24 +134,47 @@ object Main extends JFXApp {
     children += new Label(card.getText) {
       wrapText = true
       textAlignment = TextAlignment.Center
-      font = fontChoice
+      font = cardTextFont
     }
+
     card.getDeadline match {
       case Some(deadline) => {
-        children += new Label(deadline.getString)
+        if (!card.getChecklist.hasTasks && activeCard.getOrElse(BlankCard) == card) {
+          children += new HBox(12) {
+            alignment = Center
+            children += new Label(deadline.getString) {
+              textFill = deadline.getCorrectColor(card.getChecklist)
+            }
+            children += new CheckBox("Done") {
+              selected = deadline.getStatus
+              onAction = (event) => {
+                deadline.toggleStatus()
+                update()
+              }
+            }
+          }
+        } else {
+          children += new Label(deadline.getString) {
+            textFill = deadline.getCorrectColor(card.getChecklist)
+          }
+        }
+
       }
       case None =>
     }
 
     if (card.getChecklist.hasTasks) {
-      children += new Label(card.getChecklist.toString)
-      children += new ProgressBar {
-        progress = card.getChecklist.getProgress
-        minHeight = 20
-        minWidth = 150
-
+      children += new HBox(10) {
+        alignment = Center
+        children += new Label(card.getChecklist.toString)
+        children += new ProgressBar {
+          progress = card.getChecklist.getProgress
+          minHeight = 20
+          minWidth = 120
+        }
       }
-      if (activeCard == card) {
+
+      if (activeCard.getOrElse(BlankCard) == card) {
         children += new HBox {
           children += new Pane {
             minWidth = 20
@@ -174,7 +196,7 @@ object Main extends JFXApp {
     }
     card.getFile match {
       case Some(file) => {
-        if (activeCard == card) {
+        if (activeCard.getOrElse(BlankCard) == card) {
           children += new HBox(3) {
             alignment = Center
             children += new Label("File: " + file.getName)
@@ -193,7 +215,7 @@ object Main extends JFXApp {
       case None =>
     }
 
-    if (activeCard == card) {
+    if (activeCard.getOrElse(BlankCard) == card) {
       children += new HBox(4) {
         alignment = Center
         children += drawCardEdit(column, card)
@@ -203,12 +225,12 @@ object Main extends JFXApp {
 
     }
     onMouseClicked = (event) => {
-      if (activeCard == card) {
-        activeCard = noCard
+      if (activeCard.getOrElse(BlankCard) == card) {
+        activeCard = None
         activeColumn = noColumn
         columnMove = noColumn
       } else {
-        activeCard = card
+        activeCard = Some(card)
         activeColumn = column
         columnMove = noColumn
       }
@@ -225,8 +247,7 @@ object Main extends JFXApp {
           if (board.getColumns.indexOf(columnMove) < index) {
             index -= 1
           }
-          board.deleteColumn(columnMove)
-          board.addColumn(columnMove, index)
+          board.moveColumn(columnMove, index)
           columnMove = noColumn
           update()
         }
@@ -234,18 +255,18 @@ object Main extends JFXApp {
     }
   }
 
-  def getPane(column: Column, minheight: Int): Pane = {
+  def getPane(board: Board, column: Column, minheight: Int): Pane = {
     new Pane {
       minHeight = minheight
       onMouseReleased = (event) => {
         var index = panes(column).indexOf("[SFX]" + event.getPickResult.getIntersectedNode.toString)
-        if (index != -1 && activeCard != noCard) {
-          if (activeColumn == column && column.getCards.indexOf(activeCard) < index) {
+        if (index != -1 && activeCard.isDefined) {
+          val theCard = activeCard.getOrElse(BlankCard)
+          if (activeColumn == column && column.getCards.indexOf(theCard) < index) {
             index = (index - 1) max 0
           }
-          println(index)
-          activeColumn.deleteCard(activeCard)
-          column.addCard(activeCard.getText, activeCard.getColor, activeCard.getTags, activeCard.getChecklist, activeCard.getDeadline, index)
+          board.moveCard(theCard, activeColumn, column, index)
+          activeCard = None
           update()
         }
       }
@@ -255,7 +276,7 @@ object Main extends JFXApp {
   def drawColumnNewCard(board: Board, column: Column): SplitMenuButton = {
     new SplitMenuButton {
       text = "New Card"
-      font = fontChoice
+      font = defaultFont
 
       items += new MenuItem("From Archive") {
         onAction = (event) => {
@@ -267,8 +288,8 @@ object Main extends JFXApp {
 
       onAction = (event) => {
         activeColumn = column
-        activeCard = noCard
-        CardDialog.reset(kanbanApp, column, noCard, true)
+        activeCard = None
+        CardDialog.reset(kanbanApp, column, BlankCard, true)
         CardDialog.showDialog()
         activeColumn = noColumn
         update()
@@ -278,11 +299,11 @@ object Main extends JFXApp {
 
   def drawColumnEdit(board: Board, column: Column): Button = {
     new Button("Edit") {
-      font = fontChoice
+      font = defaultFont
 
       onAction = (event) => {
         activeColumn = column
-        activeCard = noCard
+        activeCard = None
         ColumnDialog.reset(board, column, false)
         ColumnDialog.showDialog()
         update()
@@ -292,7 +313,7 @@ object Main extends JFXApp {
 
   def drawColumnDelete(board: Board, column: Column): Button = {
     new Button("Delete") {
-      font = fontChoice
+      font = defaultFont
       onAction = (event) => {
 
         val result = drawAlert("Delete List", "Are you sure you want to delete the list?").showAndWait()
@@ -323,20 +344,20 @@ object Main extends JFXApp {
       children += drawColumnEdit(board, column)
       children += drawColumnDelete(board, column)
       children += new Button("Move") {
-        font = fontChoice
+        font = defaultFont
         onAction = (event) => {
           if (columnMove == column) {
             columnMove = noColumn
           } else {
             columnMove = column
-            activeCard = noCard
+            activeCard = None
           }
           update()
         }
       }
     }
     children += new Pane {
-       minHeight = 10
+      minHeight = 10
     }
     children += new Text {
       text = column.getName
@@ -350,7 +371,7 @@ object Main extends JFXApp {
 
     panes(column) = Buffer[String]()
     for (card <- column.getCards) {
-      val pane = getPane(column, 20)
+      val pane = getPane(board, column, 20)
       panes(column) += pane.toString()
       children += pane
 
@@ -359,13 +380,13 @@ object Main extends JFXApp {
       }
 
     }
-    val pane = getPane(column, 50)
+    val pane = getPane(board, column, 50)
     panes(column) += pane.toString()
     children += pane
   }
 
   val filterButton = new MenuButton("Filter") {
-    font = fontChoice
+    font = defaultFont
     items = getFilterItems
   }
 
@@ -374,7 +395,7 @@ object Main extends JFXApp {
     items += new MenuItem("Reset") {
       onAction = (event) => {
         currentFilter.clear()
-        activeCard = noCard
+        activeCard = None
         activeColumn = noColumn
         update()
       }
@@ -384,7 +405,7 @@ object Main extends JFXApp {
     for (tag <- kanbanApp.getTags) {
       items += new MenuItem(tag) {
         onAction = (event) => {
-          activeCard = noCard
+          activeCard = None
           activeColumn = noColumn
           if (currentFilter.contains(tag)) {
             currentFilter.remove(currentFilter.indexOf(tag))
@@ -402,7 +423,7 @@ object Main extends JFXApp {
     val items = Buffer[MenuItem]()
     items += new MenuItem("No Filters - Add New") {
       onAction = (event) => {
-        activeCard = noCard
+        activeCard = None
         activeColumn = noColumn
         TagDialog.reset(kanbanApp)
         TagDialog.showDialog()
@@ -419,11 +440,10 @@ object Main extends JFXApp {
     } else {
       "   Current filter: " + currentFilter.mkString(", ")
     }
-
   }
 
   val filterLabel = new Label {
-    font = fontChoice
+    font = defaultFont
     text = getFilterText
   }
 
@@ -432,7 +452,6 @@ object Main extends JFXApp {
     for (board <- kanbanApp.getBoardNames) {
       items += new MenuItem(board) {
         onAction = (event) => {
-          println(board)
           activeBoard = kanbanApp.getBoard(board)
           update()
         }
@@ -449,7 +468,7 @@ object Main extends JFXApp {
   val toolbar = new ToolBar {
     items += selectBoardMenu
     items += new Button("New Board") {
-      font = fontChoice
+      font = defaultFont
       onAction = (event) => {
         val boardNum = kanbanApp.getBoards.size
         BoardDialog.reset(kanbanApp, activeBoard, true)
@@ -461,7 +480,7 @@ object Main extends JFXApp {
       }
     }
     items += new Button("Edit Board") {
-      font = fontChoice
+      font = defaultFont
       onAction = (event) => {
         BoardDialog.reset(kanbanApp, activeBoard, false)
         BoardDialog.showDialog()
@@ -470,7 +489,7 @@ object Main extends JFXApp {
     }
     items += new Separator
     items += new Button("New List") {
-      font = fontChoice
+      font = defaultFont
       onAction = (event) => {
         ColumnDialog.reset(activeBoard, activeColumn, true)
         ColumnDialog.showDialog()
@@ -479,7 +498,7 @@ object Main extends JFXApp {
     }
     items += new Separator
     items += new Button("Archive") {
-      font = fontChoice
+      font = defaultFont
       onAction = (event) => {
         ArchiveDialog.reset(activeBoard)
         ArchiveDialog.showDialog()
@@ -488,7 +507,7 @@ object Main extends JFXApp {
     }
     items += new Separator
     items += new Button("Manage Tags") {
-      font = fontChoice
+      font = defaultFont
       onAction = (event) => {
         TagDialog.reset(kanbanApp)
         TagDialog.showDialog()
@@ -571,7 +590,7 @@ object Main extends JFXApp {
 
   def calculateWidth(board: Board) = {
     val amount = board.getColumns.size
-    (stage.width() - amount * COLUMN_WIDTH - amount * 20 - 20).toInt
+    (stage.width() - amount * COLUMN_WIDTH - amount * 20 - 20).toInt max 200
   }
 
   val boardPane = new ScrollPane {
@@ -585,19 +604,6 @@ object Main extends JFXApp {
     children += boardPane
   }
 
-  def checkFiles() = {
-    for (card <- kanbanApp.getAllCards.filter(_.getFile.isDefined)) {
-      card.getFile match {
-        case Some(file) => {
-          println("fadssdf")
-          if (!file.canRead) {
-            card.resetFile()
-          }
-        }
-        case None =>
-      }
-    }
-  }
 
   def update(): Unit = {
     boardPane.content = drawBoard(activeBoard)
@@ -609,12 +615,12 @@ object Main extends JFXApp {
   }
 
   def fullUpdate(): Unit = {
-    activeCard = noCard
+    activeCard = None
     activeBoard = kanbanApp.getBoards.head
     activeColumn = noColumn
     columnMove = noColumn
     currentFilter.clear()
-    checkFiles()
+    kanbanApp.checkFiles()
     update()
   }
 
