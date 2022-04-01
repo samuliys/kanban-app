@@ -1,12 +1,15 @@
 package kanban
 
 import scalafx.scene.paint.Color
+import java.io.File
 import scala.collection.mutable.Buffer
 
 
 class Board(private var name: String,
+            private var color: Color = Color.White,
+            private var bgImage: Option[File] = None,
             private val columns: Buffer[Column] = Buffer[Column](),
-            private val archive: Column = new Column("Archive", Color.Black)) {
+            private val archive: Column = new Column("Archive")) {
 
   def getArchive = archive
 
@@ -14,10 +17,28 @@ class Board(private var name: String,
 
   def getName = name
 
+  def getColor = color
+
+  def getBgImage = bgImage
+
+  def setBgImage(newBg: Option[File]) = bgImage = newBg
+
+  def setColor(newColor: Color) = color = newColor
+
   def getColumn(name: String) = {
     val columnNames = columns.map(_.getName)
     val index = columnNames.indexOf(name)
     columns(index)
+  }
+
+  def moveColumn(column: Column, index: Int) = {
+    columns.remove(columns.indexOf(column))
+    columns.insert(index, column)
+  }
+
+  def moveCard(card: Card, startColumn: Column, targetColumn: Column, index: Int) = {
+    startColumn.deleteCard(card)
+    targetColumn.addCard(card, index)
   }
 
   def rename(newName: String) = name = newName

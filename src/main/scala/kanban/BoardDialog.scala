@@ -7,6 +7,10 @@ import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.paint.Color
+import scalafx.stage.FileChooser
+import scalafx.stage.FileChooser.ExtensionFilter
+
+import java.io.File
 
 
 object BoardDialog {
@@ -23,6 +27,8 @@ object BoardDialog {
   private var selectedBoard = new Board("")
   private var newBoard = false
 
+  private var selectedFile: Option[File] = None
+
   private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
 
   dialog.dialogPane().buttonTypes = Seq(okButtonType, ButtonType.Cancel)
@@ -36,6 +42,50 @@ object BoardDialog {
   private val errorLabel = new Label {
     textFill = Color.Red
   }
+
+  private val bgLabel = new Label("Background")
+
+  private val fileLabel = new Label("No Chosen Image")
+
+  private val boardColor = new ColorPicker(Color.White) {
+    promptText = "Color"
+    minHeight = 25
+  }
+
+  private val chooseImageBtn = new Button("Choose Image") {
+    onAction = (event) => {
+      val fileChooser = new FileChooser {
+        extensionFilters.add(new ExtensionFilter("Image Files (*.png, *.jpg)", "*.png"))
+        extensionFilters.add(new ExtensionFilter("Image Files (*.png, *.jpg)", "*.jpg"))
+      }
+      val chooseFile = fileChooser.showOpenDialog(stage)
+
+      if (chooseFile != null) {
+        selectedFile = Some(chooseFile)
+        fileLabel.text = "Chosen file: " + chooseFile.getName
+      }
+    }
+  }
+
+  private val radio1 = new RadioButton("Solid Color") {
+    onAction = (event) => {
+      boardColor.disable = false
+      chooseImageBtn.disable = true
+
+    }
+  }
+
+  private val radio2 = new RadioButton("Image") {
+    onAction = (event) => {
+      boardColor.disable = true
+      chooseImageBtn.disable = false
+    }
+  }
+
+  private val toggle = new ToggleGroup() {
+    toggles = List(radio1, radio2)
+  }
+
   private val deleteBoardButton = new Button("Delete Board") {
     onAction = (event) => {
       val result = drawAlert("Delete", "Are you sure you want delete board?").showAndWait()
@@ -80,6 +130,19 @@ object BoardDialog {
       children += boardName
       children += errorLabel
     }
+    children += new Separator
+    children += new VBox(10) {
+      children += bgLabel
+      children += new HBox(5) {
+        children += radio1
+        children += boardColor
+      }
+      children += new HBox(5) {
+        children += radio2
+        children += chooseImageBtn
+        children += fileLabel
+      }
+    }
     children += deletePane
   }
 
@@ -92,9 +155,8 @@ object BoardDialog {
   def reset(kanban: Kanban, board: Board, isNew: Boolean) = {
     kanbanapp = kanban
     selectedBoard = board
+    selectedFile = None
     newBoard = isNew
-
-    errorLabel.text = ""
 
     if (isNew) {
       dialog.title = "Kanban - New Board"
@@ -102,6 +164,10 @@ object BoardDialog {
       okButton.disable = true
       boardName.text = ""
       deletePane.children = new Pane
+      radio1.selected = true
+      boardColor.value = Color.White
+      boardColor.disable = false
+      fileLabel.text = ""
 
     } else {
       dialog.title = "Kanban - Board Edit"
@@ -109,16 +175,41 @@ object BoardDialog {
       okButton.disable = false
       boardName.text = board.getName
       deletePane.children = deleteBoardButton
+      boardColor.value = selectedBoard.getColor
+
+      selectedBoard.getBgImage match {
+        case Some(imgFile) => {
+          radio2.selected = true
+          boardColor.disable = true
+          chooseImageBtn.disable = false
+          fileLabel.text = imgFile.getName
+
+        }
+        case None => {
+          radio1.selected = true
+          boardColor.disable = false
+          chooseImageBtn.disable = true
+          fileLabel.text = ""
+        }
+      }
 
     }
+    errorLabel.text = ""
   }
 
   dialog.resultConverter = dialogButton => {
     if (dialogButton == okButtonType) {
       if (newBoard) {
-        kanbanapp.createBoard(boardName.text())
+        kanbanapp.createBoard(boardName.text(), boardColor.value(), selectedFile)
       } else {
         selectedBoard.rename(boardName.text())
+        if (radio1.selected()) {
+          selectedBoard.setColor(boardColor.value())
+          selectedBoard.setBgImage(None)
+        } else {
+          selectedBoard.setColor(boardColor.value())
+          selectedBoard.setBgImage(selectedFile)
+        }
       }
     }
     selectedBoard

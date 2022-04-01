@@ -1,5 +1,7 @@
 package kanban
 
+import scalafx.scene.paint.Color
+import java.io.File
 import scala.collection.mutable.Buffer
 
 class Kanban(private var name: String = "untitled",
@@ -16,8 +18,8 @@ class Kanban(private var name: String = "untitled",
 
   def getTags = tags
 
-  def createBoard(name: String = "untitled"): Board = {
-    val board = new Board(name)
+  def createBoard(name: String = "untitled", color: Color = Color.White, bgImage: Option[File] = None): Board = {
+    val board = new Board(name, color, bgImage)
     boards += board
     board
   }
@@ -33,5 +35,20 @@ class Kanban(private var name: String = "untitled",
   def removeTag(name: String) = {
     boards.foreach(_.getColumns.foreach(_.getCards.foreach(_.removeTag(name))))
     tags -= name
+  }
+
+  def getAllCards = boards.flatMap(_.getColumns.flatMap(_.getCards))
+
+  def checkFiles() = {
+    for (card <- getAllCards.filter(_.getFile.isDefined)) {
+      card.getFile match {
+        case Some(file) => {
+          if (!file.canRead) {
+            card.resetFile()
+          }
+        }
+        case None =>
+      }
+    }
   }
 }
