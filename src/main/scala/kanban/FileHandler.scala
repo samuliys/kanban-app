@@ -77,13 +77,15 @@ class FileHandler {
   }
 
   implicit val encodeDeadline: Encoder[Deadline] = (a: Deadline) => Json.obj(
-    ("date", a.getRawDate.asJson)
+    ("date", a.getRawDate.asJson),
+    ("status", a.getStatus.asJson)
   )
 
   implicit val decodeDeadline: Decoder[Deadline] = (c: HCursor) => for {
     deadline <- c.downField("date").as[String]
+    status <- c.downField("status").as[Boolean]
   } yield {
-    new Deadline(LocalDate.parse(deadline))
+    new Deadline(LocalDate.parse(deadline), status)
   }
 
   implicit val encodeColor: Encoder[Color] = (a: Color) => Json.obj(
