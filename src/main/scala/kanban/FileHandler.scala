@@ -23,15 +23,17 @@ class FileHandler {
   implicit val encodeKanban: Encoder[Kanban] = (a: Kanban) => Json.obj(
     ("name", a.getName.asJson),
     ("boards", a.getBoards.asJson),
-    ("tags", a.getTags.asJson)
+    ("tags", a.getTags.asJson),
+    ("templates", a.getTemplates.asJson)
   )
 
   implicit val decodeKanban: Decoder[Kanban] = (c: HCursor) => for {
     name <- c.downField("name").as[String]
     boards <- c.downField("boards").as[Buffer[Board]]
     tags <- c.downField("tags").as[Buffer[String]]
+    templates <- c.downField("templates").as[Buffer[Card]]
   } yield {
-    new Kanban(name, boards, tags)
+    new Kanban(name, boards, tags, templates)
   }
 
   implicit val encodeFile: Encoder[File] = (a: File) => Json.obj(
@@ -113,15 +115,12 @@ class FileHandler {
   }
 
   implicit val encodeSubCard: Encoder[SubCard] = (a: SubCard) => Json.obj(
-    ("text", a.getText.asJson),
-    ("color", a.getColor.asJson)
+    ("card", a.getOriginal.asJson)
   )
-
   implicit val decodeSubCard: Decoder[SubCard] = (c: HCursor) => for {
-    text <- c.downField("text").as[String]
-    color <- c.downField("color").as[Color]
+    card <- c.downField("card").as[Card]
   } yield {
-    new SubCard(text, color)
+    new SubCard(card)
   }
 
   implicit val encodeCard: Encoder[Card] = (a: Card) => Json.obj(
