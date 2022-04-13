@@ -3,7 +3,23 @@ Progress Log - Samuli Yli-Salomäki 909509
 Päivitetty viimeksi 13.4. väliraportilla 4
 
 Väliraportti 3: 31.3.-13.4.
-Lisätty templatet
+
+Lisätty korteille mallipohjat (template) ja mahdollisuus tehdä valmiista kortista uusi malli.
+Lisätty ikkunat kortin valintaa varten eri tilanteissa.
+Lisätty mahdollisuus laittaa kortti liitteeksi kortille.
+Päivitetty json-koodekit tukemaan näitä uusia ominmaisuuksia.
+
+Edellä mainittuja ominaisuuksia testattu ja ne toimivat ainakin perustilanteissa.
+Testausta kuitenkin edelleen vaaditaan kaikkien tilanteiden toimivuuden armistamiseksi.
+
+Circen json-koodekki ei antanut laittaa Card-luokan instanssia Card-luokan koodekin sisään, mikä aiheutti ongelmaa tallennuksen suhteen.
+Sain asian korjattua luomalla luokan SubCard, joka perii yläluokan Card ja sain näin kierrettyä circen rajoitteen asian suhteen.
+
+Käytetty työmäärä noin 15 tuntia.
+
+Olen mielestäni aikataulussa ja ohjelmassa alkaa olla kaikki vaaditut ominaisuudet.
+Uskon saavani kaiken valmiiksi palautuspäivään mennessä.
+
 
 Väliraportti 2: 17.3.-30.3.
 
