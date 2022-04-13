@@ -1,6 +1,9 @@
 Progress Log - Samuli Yli-Salomäki 909509
 
-Päivitetty viimeksi 30.3. väliraportilla 2
+Päivitetty viimeksi 13.4. väliraportilla 4
+
+Väliraportti 3: 31.3.-13.4.
+Lisätty templatet
 
 Väliraportti 2: 17.3.-30.3.
 
