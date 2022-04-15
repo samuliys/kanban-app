@@ -132,7 +132,7 @@ object CardDialog {
     }
   }
 
-  private def getTaskList = checklist.getTasksNames.toList
+  private def getTaskList: List[String] = checklist.getTasksNames.toList
 
   private val taskRemoveMenu: ComboBox[String] = new ComboBox(getTaskList) {
     promptText = "Select Task to Remove"
@@ -319,14 +319,13 @@ object CardDialog {
     }
   }
 
-  def disableRemoveUrlButton() = removeUrlButton.disable = true
+  def disableRemoveUrlButton(): Unit = removeUrlButton.disable = true
 
   private val openUrlButton = new Button("Open") {
     minWidth = openButtonWidth
     onAction = (event) => {
       selectedUrl match {
         case Some(url) => {
-
           if (Desktop.isDesktopSupported) {
             Desktop.getDesktop.browse(new URI(url))
           }
@@ -346,7 +345,7 @@ object CardDialog {
         initOwner(stage)
         title = "Template"
         headerText = "Template Created Succesfully"
-        //contentText = ""
+        contentText = "Templates can be found by clicking 'Templates' on the main screen"
       }.showAndWait()
     }
   }
@@ -383,14 +382,23 @@ object CardDialog {
     }
   }
 
+  private def cardReset(): Unit = {
+    val wasNew = newCard
+    val wasTemplate = template
+    val oldCard = selectedCard
+    reset(kanbanapp, selectedColumn, new Card, true)
+    if (!wasNew) {
+      dialog.title = "Kanban - Card Edit"
+      dialog.headerText = "Edit Card"
+    }
+    newCard = wasNew
+    template = wasTemplate
+    selectedCard = oldCard
+  }
+
   private val resetAllButton = new Button("Reset All") {
     onAction = (event) => {
-      val wasNew = newCard
-      reset(kanbanapp, selectedColumn, new Card, true)
-      if (!wasNew) {
-        dialog.title = "Kanban - Card Edit"
-        dialog.headerText = "Edit Card"
-      }
+      cardReset()
     }
   }
 
@@ -532,7 +540,7 @@ object CardDialog {
 
   Platform.runLater(cardText.requestFocus())
 
-  def reset(kanban: Kanban, column: Column, card: Card, isNew: Boolean, isTemplate: Boolean = false) = {
+  def reset(kanban: Kanban, column: Column, card: Card, isNew: Boolean, isTemplate: Boolean = false): Unit = {
     kanbanapp = kanban
     selectedColumn = column
     selectedCard = card
@@ -632,7 +640,7 @@ object CardDialog {
     resetTagEdit()
   }
 
-  private def resetTagEdit() = {
+  private def resetTagEdit(): Unit = {
 
     drawAddTag.items = drawAddTagMenuItems
     drawRemoveTag.items = drawRemoveTagMenuItems
@@ -652,17 +660,7 @@ object CardDialog {
     }
   }
 
-  private def resetTaskEdit() = {
-    drawAddTag.items = drawAddTagMenuItems
-    drawRemoveTag.items = drawRemoveTagMenuItems
-    if (cardTags.isEmpty) {
-      drawCurrentTags.text = "No tags - Click 'Manage Tags' to Add New Tags"
-    } else {
-      drawCurrentTags.text = cardTags.mkString(", ")
-    }
-  }
-
-  private def getDeadline = {
+  private def getDeadline: Option[Deadline] = {
     if (deadlineCheckbox.selected()) {
       Some(new Deadline(drawDatePicker.value()))
     } else {
@@ -670,7 +668,7 @@ object CardDialog {
     }
   }
 
-  private def update() = dialog.dialogPane().content = drawContents
+  private def update(): Unit = dialog.dialogPane().content = drawContents
 
   dialog.resultConverter = dialogButton => {
     if (dialogButton == okButtonType) {
