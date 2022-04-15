@@ -53,10 +53,10 @@ object BoardDialog {
   }
 
   private val chooseImageBtn = new Button("Choose Image") {
+    minWidth = 125
     onAction = (event) => {
       val fileChooser = new FileChooser {
-        extensionFilters.add(new ExtensionFilter("Image Files (*.png, *.jpg)", "*.png"))
-        extensionFilters.add(new ExtensionFilter("Image Files (*.png, *.jpg)", "*.jpg"))
+        extensionFilters.add(new ExtensionFilter("Image Files (*.png, *.jpg)", Seq("*.png", "*.jpg")))
       }
       val chooseFile = fileChooser.showOpenDialog(stage)
 
@@ -68,6 +68,7 @@ object BoardDialog {
   }
 
   private val radio1 = new RadioButton("Solid Color") {
+    minWidth = 90
     onAction = (event) => {
       boardColor.disable = false
       chooseImageBtn.disable = true
@@ -76,6 +77,7 @@ object BoardDialog {
   }
 
   private val radio2 = new RadioButton("Image") {
+    minWidth = 90
     onAction = (event) => {
       boardColor.disable = true
       chooseImageBtn.disable = false
@@ -99,8 +101,10 @@ object BoardDialog {
     }
   }
 
+  private val separator = new Separator
+
   private val deletePane = new Pane {
-    children = deleteBoardButton
+    children += deleteBoardButton
   }
 
   boardName.text.onChange { (_, _, newValue) =>
@@ -143,6 +147,7 @@ object BoardDialog {
         children += fileLabel
       }
     }
+    children += separator
     children += deletePane
   }
 
@@ -163,6 +168,7 @@ object BoardDialog {
       dialog.headerText = "Create New Board"
       okButton.disable = true
       boardName.text = ""
+      separator.visible = false
       deletePane.children = new Pane
       radio1.selected = true
       boardColor.value = Color.White
@@ -174,6 +180,7 @@ object BoardDialog {
       dialog.headerText = "Edit board: " + board.getName
       okButton.disable = false
       boardName.text = board.getName
+      separator.visible = true
       deletePane.children = deleteBoardButton
       boardColor.value = selectedBoard.getColor
 
