@@ -1,6 +1,7 @@
 package kanban
 
 import scalafx.application.JFXApp
+import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
 import scalafx.scene.layout._
 import scalafx.scene.control._
@@ -14,10 +15,10 @@ import scalafx.geometry.Pos._
 import scalafx.geometry.Insets
 import scalafx.Includes._
 import javafx.beans.value.ObservableValue
-import settings._
 import java.awt.Desktop
+import java.net.URI
 import scala.collection.mutable.{Buffer, Map}
-import scalafx.application.JFXApp.PrimaryStage
+import settings._
 
 
 object Main extends JFXApp {
@@ -25,6 +26,7 @@ object Main extends JFXApp {
     title.value = "KanbanApp"
     width = 1100
     height = 800
+    //icons += new Image("icon.png")
   }
 
   private val panes = Map[Column, Buffer[String]]()
@@ -41,9 +43,9 @@ object Main extends JFXApp {
 
   private var activeBoard = kanbanApp.getBoards.head
 
-  private var activeCard: Option[Card]      = None
-  private var activeColumn: Option[Column]  = None
-  private var columnMove: Option[Column]    = None
+  private var activeCard: Option[Card] = None
+  private var activeColumn: Option[Column] = None
+  private var columnMove: Option[Column] = None
 
   private var boardBackground: Background = getBoardBackground(activeBoard)
 
@@ -180,7 +182,7 @@ object Main extends JFXApp {
           children += new HBox(5) {
             alignment = Center
             children += new Label("File: " + file.getName)
-            children += new Button("Open File") {
+            children += new Button("Open") {
               onAction = (event) => {
                 if (file.canRead && Desktop.isDesktopSupported) {
                   Desktop.getDesktop.open(file)
@@ -189,7 +191,28 @@ object Main extends JFXApp {
             }
           }
         } else {
-          children += new Label("File Attachment: " + file.getName)
+          children += new Label("File: " + file.getName)
+        }
+      }
+      case None =>
+    }
+
+    card.getUrl match {
+      case Some(url) => {
+        if (activeCard.getOrElse(new Card) == card) {
+          children += new HBox(5) {
+            alignment = Center
+            children += new Label("URL: " + url)
+            children += new Button("Open") {
+              onAction = (event) => {
+                if (Desktop.isDesktopSupported) {
+                  Desktop.getDesktop.browse(new URI(url))
+                }
+              }
+            }
+          }
+        } else {
+          children += new Label("URL: " + url)
         }
       }
       case None =>
@@ -200,7 +223,7 @@ object Main extends JFXApp {
         if (activeCard.getOrElse(new Card) == card) {
           children += new HBox(5) {
             alignment = Center
-            children += new Label("SubCard: ")
+            children += new Label("Card Attachment: ")
             children += new Button("View") {
               onAction = (event) => {
                 CardViewDialog.reset(sub.getOriginal)
