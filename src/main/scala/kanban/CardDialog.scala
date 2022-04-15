@@ -18,6 +18,7 @@ import java.io.File
 import java.net.{URI, URL}
 import java.time.LocalDate
 import scala.collection.mutable.Buffer
+import scala.util.{Failure, Success, Try}
 
 object CardDialog {
 
@@ -284,11 +285,25 @@ object CardDialog {
       val result = dialog.showAndWait()
       result match {
         case Some(enteredUrl) =>
-          val joo = new URL(enteredUrl)
-          selectedUrl = Some(enteredUrl)
-          removeUrlButton.disable = false
-          openUrlButton.disable = false
-          urlLabel.text = "URL: " + enteredUrl
+          val validateUrl = Try {
+            new URL(enteredUrl)
+          }
+          validateUrl match {
+            case Failure(exception) => {
+              new Alert(AlertType.Information) {
+                initOwner(stage)
+                title = "Invalid URL"
+                headerText = "Invalid URL"
+                contentText = "Please Enter a Valid URL Starting with http(s)://"
+              }.showAndWait()
+            }
+            case Success(url) => {
+              selectedUrl = Some(enteredUrl)
+              removeUrlButton.disable = false
+              openUrlButton.disable = false
+              urlLabel.text = "URL: " + enteredUrl
+            }
+          }
         case None =>
       }
     }
@@ -538,7 +553,6 @@ object CardDialog {
       cardText.text = ""
       borderColor.value = DefaultColor
       textColor.value = DefaultColor
-
 
     } else {
       dialog.title = "Kanban - Card Edit"
