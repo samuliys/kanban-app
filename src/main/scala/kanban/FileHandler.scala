@@ -125,24 +125,28 @@ class FileHandler {
 
   implicit val encodeCard: Encoder[Card] = (a: Card) => Json.obj(
     ("text", a.getText.asJson),
-    ("color", a.getColor.asJson),
+    ("textColor", a.getTextColor.asJson),
+    ("borderColor", a.getBorderColor.asJson),
     ("tags", a.getTags.asJson),
     ("checklist", a.getChecklist.asJson),
     ("deadline", a.getDeadline.asJson),
     ("file", a.getFile.asJson),
-    ("subcard", a.getSubcard.asJson)
+    ("subcard", a.getSubcard.asJson),
+    ("url", a.getUrl.asJson)
   )
 
   implicit val decodeCard: Decoder[Card] = (c: HCursor) => for {
     text <- c.downField("text").as[String]
-    color <- c.downField("color").as[Color]
+    textColor <- c.downField("textColor").as[Color]
+    borderColor <- c.downField("borderColor").as[Color]
     tags <- c.downField("tags").as[Buffer[String]]
     checklist <- c.downField("checklist").as[Checklist]
     deadline <- c.downField("deadline").as[Option[Deadline]]
     file <- c.downField("file").as[Option[File]]
     subcard <- c.downField("subcard").as[Option[SubCard]]
+    url <- c.downField("url").as[Option[String]]
   } yield {
-    new Card(text, color, tags, checklist, deadline, file, subcard)
+    new Card(text, textColor, borderColor, tags, checklist, deadline, file, subcard, url)
   }
 
   def save(kanbanapp: Kanban): Boolean = {
@@ -175,7 +179,7 @@ class FileHandler {
       }.toEither.flatten
       val result = kanbanFromFile.getOrElse(oldKanban)
       if (result == oldKanban) {
-        new Alert(AlertType.Warning, "Selected File has incorrect json format").showAndWait()
+        new Alert(AlertType.Warning, "Selected File Uses an Incorrect JSON Format.\nPlease Select Another File.").showAndWait()
       }
       Some(result)
     } else {
