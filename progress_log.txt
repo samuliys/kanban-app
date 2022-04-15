@@ -1,6 +1,6 @@
 Progress Log - Samuli Yli-Salomäki 909509
 
-Päivitetty viimeksi 13.4. väliraportilla 4
+Päivitetty viimeksi 13.4. väliraportilla 3
 
 Väliraportti 3: 31.3.-13.4.
 
@@ -75,9 +75,6 @@ Olen käyttänyt projektiin arviolta 30 tuntia tähän mennessä.
 Olen tällä hetkellä aikataulua edellä. Olen onnistunut saamaan monia ominaisuuksia tehtyä, jotka alunperin piti tehdä vasta myöhemmin.
 
 
-
-
-Väliraportti 3: 31.3.-13.4.
 
 
 -----
