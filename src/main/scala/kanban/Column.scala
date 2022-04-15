@@ -18,8 +18,10 @@ class Column(private var name: String = "",
 
   def rename(newName: String) = name = newName
 
-  def addNewCard(text: String, color: Color, tags: Buffer[String], checklist: Checklist, deadline: Option[Deadline], file: Option[File], subCard: Option[SubCard] = None) = {
-    cards += new Card(text, color, tags, checklist, deadline, file, subCard)
+  def addNewCard(text: String, textColor: Color, borderColor: Color, tags: Buffer[String],
+                 checklist: Checklist, deadline: Option[Deadline], file: Option[File],
+                 subCard: Option[SubCard] = None, url: Option[String] = None) = {
+    cards += new Card(text, textColor, borderColor, tags, checklist, deadline, file, subCard, url)
   }
 
   def addCard(card: Card, index: Int = 0) = {

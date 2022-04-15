@@ -1,20 +1,24 @@
 package kanban
 
 import scalafx.scene.paint.Color
-
 import java.io.File
 import scala.collection.mutable.Buffer
 
-class Card(private var text: String,
-           private var color: Color,
+class Card(private var text: String = "",
+           private var textColor: Color = Color.Black,
+           private var borderColor: Color = Color.Black,
            private var tags: Buffer[String] = Buffer[String](),
            private var checklist: Checklist = new Checklist,
            private var deadline: Option[Deadline] = None,
-           private var file: Option[File] = None) {
+           private var file: Option[File] = None,
+           private var subCard: Option[SubCard] = None,
+           private var url: Option[String] = None) {
 
   def getText = text
 
-  def getColor = color
+  def getTextColor = textColor
+
+  def getBorderColor = borderColor
 
   def getTags = tags
 
@@ -28,13 +32,18 @@ class Card(private var text: String,
     }
   }
 
-  def editCard(newText: String, newColor: Color, newTags: Buffer[String], newChecklist: Checklist, newDeadline: Option[Deadline], newFile: Option[File]) = {
+  def editCard(newText: String, newTextColor: Color, newBorderColor: Color,
+               newTags: Buffer[String], newChecklist: Checklist, newDeadline: Option[Deadline],
+               newFile: Option[File], newSubcard: Option[SubCard], newUrl: Option[String]) = {
     text = newText
-    color = newColor
+    textColor = newTextColor
+    borderColor = newBorderColor
     tags = newTags
     deadline = newDeadline
     file = newFile
     checklist = newChecklist
+    url = newUrl
+    subCard = newSubcard
   }
 
   def hasDeadline = deadline.isDefined
@@ -42,6 +51,16 @@ class Card(private var text: String,
   def getDeadline = deadline
 
   def getFile = file
+
+  def addSubCard(card: SubCard) = subCard = Some(card)
+
+  def getSubcard = subCard
+
+  def removeSubcard(): Unit = subCard = None
+
+  def getUrl = url
+
+  def toSub: SubCard = new SubCard(this)
 
   def resetFile() = file = None
 }
