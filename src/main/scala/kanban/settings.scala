@@ -1,6 +1,7 @@
 import scalafx.scene.text.Font
 import scalafx.scene.paint.Color
 
+/** Package object containing basic settings for the GUI. */
 package object settings {
 
   // Starting window dimensions
@@ -11,6 +12,7 @@ package object settings {
   val CardHeight = 120
   val CardWidth = 310
   val ColumnWidth = 330
+  val ColumnGapSize = 20
 
   // Defualt fonts
   val DefaultFont = Font.font("arial", 13)
