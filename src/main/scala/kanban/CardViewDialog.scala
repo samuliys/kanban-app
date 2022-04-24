@@ -1,52 +1,61 @@
 package kanban
 
-import kanban.Main.stage
 import scalafx.scene.layout._
 import scalafx.scene.control._
 import scalafx.scene.text._
 import scalafx.geometry.Pos._
 import scalafx.Includes._
+import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control.ButtonBar.ButtonData
 import settings._
 
 import java.awt.Desktop
 
+/** Dialog object for viewing a single card. */
 object CardViewDialog {
 
-  val dialog = new Dialog {
-    initOwner(stage)
+  private val dialog = new Dialog { // create dialog to be shown
+    initOwner(Main.getStage)
   }
-  var selectedCard = new Card
+  private var selectedCard = new Card // save card to be displayed to this variable
 
+  /** Opens dialog window */
   def showDialog() = dialog.showAndWait()
 
+  /** Resets the dialog in order to show a new card
+   *
+   * @param card card to be shown */
   def reset(card: Card): Unit = {
     selectedCard = card
     update()
   }
 
-  val okButtonType = new ButtonType("OK", ButtonData.OKDone)
-  dialog.dialogPane().buttonTypes = Seq(ButtonType.OK)
-  val okButton = dialog.dialogPane().lookupButton(okButtonType)
+  private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
+  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
-  def drawContents: VBox = new VBox(10) {
+  dialog.dialogPane().buttonTypes = Seq(ButtonType.OK) // add button to view
+
+  /** Forms VBox component used as the root of all dialog components
+   *
+   * @return VBox component with all dialog window components */
+  private def drawContents: VBox = new VBox(10) {
     minHeight = 120
     minWidth = 300
     alignment = Center
     border = new Border(new BorderStroke(selectedCard.getBorderColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
 
-    children += new Label(selectedCard.getText) {
+    children += new Label(selectedCard.getText) { // display card text
       wrapText = true
       textAlignment = TextAlignment.Center
       font = CardTextFont
       textFill = selectedCard.getTextColor
     }
-    selectedCard.getDeadline match {
+    selectedCard.getDeadline match { // display card deadline
       case Some(deadline) => {
         if (!selectedCard.getChecklist.hasTasks) {
           children += new HBox(12) {
             alignment = Center
-            children += new Label(deadline.getString) {
+            children += new Label(deadline.toString) {
               textFill = deadline.getCorrectColor(selectedCard.getChecklist)
             }
             children += new CheckBox("Done") {
@@ -58,7 +67,7 @@ object CardViewDialog {
             }
           }
         } else {
-          children += new Label(deadline.getString) {
+          children += new Label(deadline.toString) {
             textFill = deadline.getCorrectColor(selectedCard.getChecklist)
           }
         }
@@ -66,7 +75,7 @@ object CardViewDialog {
       case None =>
     }
 
-    if (selectedCard.getChecklist.hasTasks) {
+    if (selectedCard.getChecklist.hasTasks) { // display card tasks
       children += new HBox(10) {
         alignment = Center
         children += new Label(selectedCard.getChecklist.toString)
@@ -82,7 +91,7 @@ object CardViewDialog {
         }
         children += new VBox(2) {
           for (task <- selectedCard.getChecklist.getTasks) {
-            children += new CheckBox() {
+            children += new CheckBox() { // display each task with checkbox
               text = task._2
               selected = task._1
               onAction = (event) => {
@@ -97,7 +106,6 @@ object CardViewDialog {
     }
     selectedCard.getFile match {
       case Some(file) => {
-
         children += new HBox(3) {
           alignment = Center
           children += new Label("File: " + file.getName)
@@ -105,6 +113,9 @@ object CardViewDialog {
             onAction = (event) => {
               if (file.canRead && Desktop.isDesktopSupported) {
                 Desktop.getDesktop.open(file)
+              } else {
+                selectedCard.resetFile()
+                new Alert(AlertType.Warning, "There was an error opening the file.").showAndWait()
               }
             }
           }
@@ -114,7 +125,8 @@ object CardViewDialog {
     }
   }
 
-  dialog.dialogPane().content = drawContents
+  dialog.dialogPane().content = drawContents // set contents to screen
 
-  def update() = dialog.dialogPane().content = drawContents
+  /** Updates dialog view with up to date information. */
+  private def update(): Unit = dialog.dialogPane().content = drawContents
 }
