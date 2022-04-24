@@ -25,7 +25,6 @@ object ColumnDialog {
   private var newColumn = false
 
   private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
-  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   dialog.dialogPane().buttonTypes = Seq(okButtonType, ButtonType.Cancel) // add buttons to dialog
 
@@ -80,6 +79,8 @@ object ColumnDialog {
     }
   }
 
+  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
+
   dialog.dialogPane().content = drawContents // set dialog content to view
 
   Platform.runLater(columnName.requestFocus()) // set focus on text field
@@ -96,7 +97,7 @@ object ColumnDialog {
     selectedColumn = column
     newColumn = isNew
 
-    if (isNew) {  // reset many aspects of dialog when creating new board
+    if (isNew) { // reset many aspects of dialog when creating new board
       dialog.title = "Kanban - New List"
       dialog.headerText = "Add New List"
       columnName.text = ""

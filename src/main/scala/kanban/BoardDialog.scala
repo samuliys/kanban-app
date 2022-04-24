@@ -32,7 +32,6 @@ object BoardDialog {
   private var selectedFile: Option[File] = None
 
   private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
-  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   dialog.dialogPane().buttonTypes = Seq(okButtonType, ButtonType.Cancel) // add buttons to dialog
 
@@ -132,6 +131,8 @@ object BoardDialog {
     children += separator
     children += deletePane
   }
+
+  private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   dialog.dialogPane().content = drawContents // set dialog content to view
 
