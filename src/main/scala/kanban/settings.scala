@@ -24,4 +24,5 @@ package object settings {
 
   // Default colors
   val DefaultColor = Color.Black
+  val DefaultBoardColor = Color.White
 }
