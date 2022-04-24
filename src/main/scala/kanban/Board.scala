@@ -4,58 +4,71 @@ import scalafx.scene.paint.Color
 import java.io.File
 import scala.collection.mutable.Buffer
 
-
-class Board(private var name: String,
+/** Models a kanban board. A board has lists that have cards inside them.
+ * Boards can also have background images and each of them has their own archive.
+ *
+ * @param name    name of the board
+ * @param color   background color (used if no image)
+ * @param bgImage background image
+ * @param columns columns that the board has
+ * @param archive the board's archive
+ */
+class Board(private var name: String = "",
             private var color: Color = Color.White,
             private var bgImage: Option[File] = None,
             private val columns: Buffer[Column] = Buffer[Column](),
             private val archive: Column = new Column("Archive")) {
 
-  def getArchive = archive
+  // Simple get-methods for getting information about the Board
+  def getName: String = name
 
-  def getColumns = this.columns
+  def getColor: Color = color
 
-  def getName = name
+  def getBgImage: Option[File] = bgImage
 
-  def getColor = color
+  def getColumns: Buffer[Column] = columns
 
-  def getBgImage = bgImage
+  def getArchive: Column = archive
 
-  def setBgImage(newBg: Option[File]) = bgImage = newBg
+  def getColumnNames: List[String] = columns.map(_.getName).toList
 
-  def setColor(newColor: Color) = color = newColor
+  def getColumn(name: String): Column = columns(getColumnNames.indexOf(name)) // used by the archive to select correct column based on name
 
-  def getColumn(name: String) = {
-    val columnNames = columns.map(_.getName)
-    val index = columnNames.indexOf(name)
-    columns(index)
-  }
+  // Simple set-methods for setting board variables
+  def setName(newName: String): Unit = name = newName
 
-  def moveColumn(column: Column, index: Int) = {
-    columns.remove(columns.indexOf(column))
+  def setBgImage(newBg: Option[File]): Unit = bgImage = newBg
+
+  def setColor(newColor: Color): Unit = color = newColor
+
+  /** Moves a column from one position to another
+   *
+   * @param column column to be moved
+   * @param index  target location index */
+  def moveColumn(column: Column, index: Int): Unit = {
+    columns -= column
     columns.insert(index, column)
   }
 
-  def moveCard(card: Card, startColumn: Column, targetColumn: Column, index: Int) = {
+  /** Moves a column from one position to another
+   *
+   * @param card         card to be moved
+   * @param startColumn  original column of the card
+   * @param targetColumn column the card will be moved
+   * @param index        target column location index */
+  def moveCard(card: Card, startColumn: Column, targetColumn: Column, index: Int): Unit = {
     startColumn.deleteCard(card)
     targetColumn.addCard(card, index)
   }
 
-  def rename(newName: String) = name = newName
+  /** Creates a new column and adds it to the board columns
+   *
+   * @param name  name of the column to be created
+   * @param color border color of the column */
+  def addColumn(name: String = "untitled", color: Color = Color.Black): Unit = columns += new Column(name, color)
 
-  def addColumn(name: String = "untitled", color: Color = Color.Black): Column = {
-    val column = new Column(name, color)
-    columns += column
-    column
-  }
-
-  def addColumn(column: Column, index: Int) = {
-    columns.insert(index, column)
-  }
-
-  def deleteColumn(column: Column) = {
-    columns.remove(columns.indexOf(column))
-  }
-
-  def getColumnNames = columns.map(_.getName).toList
+  /** Creates a new column and adds it to the board columns
+   *
+   * @param column column to be deleted */
+  def deleteColumn(column: Column): Unit = columns -= column
 }

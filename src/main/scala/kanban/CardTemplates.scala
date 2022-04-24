@@ -1,7 +1,6 @@
 package kanban
 
 import scalafx.scene.paint.Color
-
 import java.time.LocalDate
 import scala.collection.mutable.Buffer
 

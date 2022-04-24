@@ -21,19 +21,17 @@ class FileHandler {
   // Manually created json encoders and decoders for all classes that will be saved to file
 
   implicit val encodeKanban: Encoder[Kanban] = (a: Kanban) => Json.obj(
-    ("name", a.getName.asJson),
     ("boards", a.getBoards.asJson),
     ("tags", a.getTags.asJson),
     ("templates", a.getTemplates.asJson)
   )
 
   implicit val decodeKanban: Decoder[Kanban] = (c: HCursor) => for {
-    name <- c.downField("name").as[String]
     boards <- c.downField("boards").as[Buffer[Board]]
     tags <- c.downField("tags").as[Buffer[String]]
     templates <- c.downField("templates").as[Buffer[Card]]
   } yield {
-    new Kanban(name, boards, tags, templates)
+    new Kanban(boards, tags, templates)
   }
 
   implicit val encodeFile: Encoder[File] = (a: File) => Json.obj(
@@ -115,7 +113,7 @@ class FileHandler {
   }
 
   implicit val encodeSubCard: Encoder[SubCard] = (a: SubCard) => Json.obj(
-    ("card", a.getOriginal.asJson)
+    ("card", a.getCard.asJson)
   )
   implicit val decodeSubCard: Decoder[SubCard] = (c: HCursor) => for {
     card <- c.downField("card").as[Card]
@@ -177,10 +175,10 @@ class FileHandler {
   /** Loads and decodes a json save file and returns the new kanban session wrapped in option
    *
    * @param oldKanban current kanban session, will be reverted back to if file decode fails
-   * @return None if no file selected or error reading file,
+   * @return None and false if no file selected or error reading file,
    *         or instance of Kanban class wrapped in an option;
-   *         new kanban from file or old if decode fails */
-  def load(oldKanban: Kanban): Option[Kanban] = {
+   *         new kanban from file and true or old if decode fails and false*/
+  def load(oldKanban: Kanban): (Option[Kanban], Boolean) = {
     val fileChooser = new FileChooser {
       extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json")) // allow only selecting json files
     }
@@ -193,21 +191,23 @@ class FileHandler {
       sourceData match {
         case Failure(exception) => { // show error message if fails
           new Alert(AlertType.Warning, "There was an error reading the file.").showAndWait()
-          None
+          (None, false)
         }
         case Success(data) => {
+          var success = true
           val kanbanFromFile = Using(data) { // read the file and handle possible exceptions
             source => decode[Kanban](source.getLines().mkString(""))
           }.toEither.flatten
           val result = kanbanFromFile.getOrElse(oldKanban) // get either the new one or if failed, revert back to old
           if (result == oldKanban) { // if file could not be decoded, show user error message alert
+            success = false
             new Alert(AlertType.Warning, "Selected File Uses an Incorrect JSON Format.\nPlease Select Another File.").showAndWait()
           }
-          Some(result)
+          (Some(result), success)
         }
       }
     } else {
-      None
+      (None, false)
     }
   }
 }
