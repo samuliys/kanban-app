@@ -171,7 +171,7 @@ class FileHandler {
       }
       save match { // display error message if something went wrong while saving
         case Failure(exception) => new Alert(AlertType.Warning, "There was an error when saving to file.").showAndWait()
-        case Success(value) =>
+        case Success(value) => new Alert(AlertType.Information, "File Saved Succesfully.").showAndWait()
       }
     }
   }
@@ -194,7 +194,7 @@ class FileHandler {
       }
       sourceData match {
         case Failure(exception) => { // show error message if fails
-          new Alert(AlertType.Warning, "There was an error reading the file.").showAndWait()
+          new Alert(AlertType.Warning, "There Was an Error Reading the File.").showAndWait()
           (None, false)
         }
         case Success(data) => {
