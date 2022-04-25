@@ -155,9 +155,13 @@ class FileHandler {
     val fileChooser = new FileChooser {
       extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json")) // only json files will be created
     }
-    val selectedFile = fileChooser.showSaveDialog(Main.getStage)
+    var selectedFile = fileChooser.showSaveDialog(Main.getStage)
     if (selectedFile != null) { // make sure a save file was selected before using it
       val save = Try {
+        // on some devices .json will not be automatically added to the file name despite extension filter
+        if (!selectedFile.getName.endsWith(".json")) {
+          selectedFile = new File(selectedFile.getAbsolutePath + ".json") // in those cases, add it manually
+        }
         val kanbanJson = kanbanapp.asJson.noSpaces // encode entire kanban session
         val fileWriter = new FileWriter(selectedFile)
         val printWriter = new PrintWriter(fileWriter)
@@ -177,7 +181,7 @@ class FileHandler {
    * @param oldKanban current kanban session, will be reverted back to if file decode fails
    * @return None and false if no file selected or error reading file,
    *         or instance of Kanban class wrapped in an option;
-   *         new kanban from file and true or old if decode fails and false*/
+   *         new kanban from file and true or old if decode fails and false */
   def load(oldKanban: Kanban): (Option[Kanban], Boolean) = {
     val fileChooser = new FileChooser {
       extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json")) // allow only selecting json files
