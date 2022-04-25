@@ -125,6 +125,9 @@ object CardListDialog {
 
   private val scroll = new ScrollPane { // main scroll component for displaying all cards
     minHeight = 400
+    maxHeight = 400
+    minWidth = 350
+    maxWidth = 350
     content = cardListCards
   }
 
@@ -132,7 +135,6 @@ object CardListDialog {
    *
    * @return VBox component with all dialog window components */
   private def drawContents(mode: Int = 1): VBox = new VBox(10) {
-    minWidth = 310
     if (mode == 1) { // depending on mode show archive or...
       children += new Button("Manage Archive") {
         onAction = (event) => {

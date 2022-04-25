@@ -15,6 +15,7 @@ object ArchiveDialog {
 
   private val dialog = new Dialog { // Create main dialog
     initOwner(Main.getStage)
+    height = 500
   }
 
   /** Opens dialog window */
@@ -182,7 +183,9 @@ object ArchiveDialog {
 
   private val scroll = new ScrollPane { // main scroll component for displaying all cards
     minHeight = 400
-    minWidth = 320
+    maxHeight = 400
+    minWidth = 350
+    maxWidth = 350
     content = getListCards(archive.getCards)
   }
 
@@ -209,7 +212,7 @@ object ArchiveDialog {
    * @return VBox component with all dialog window components */
   private def drawContents: VBox = new VBox(10) {
     alignment = Center
-    minWidth = 320
+    //minWidth = 320
     children += new HBox(10) {
       children += selectAllButton
       children += unSelectButton
