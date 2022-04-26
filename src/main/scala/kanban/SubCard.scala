@@ -1,5 +1,6 @@
 package kanban
 
+
 /** Models a card attachment on a card. Class was created to circumvent a circe-library json-encode restriction.
  *
  * @param card the card the subcard models

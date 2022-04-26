@@ -1,9 +1,9 @@
 package kanban
 
 import scalafx.scene.paint.Color
-
 import java.io.File
 import scala.collection.mutable.Buffer
+
 
 /** Models a list, column on the board. Columns have cards inside them.
  *

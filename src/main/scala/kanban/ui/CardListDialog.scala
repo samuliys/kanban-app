@@ -9,6 +9,7 @@ import scalafx.scene.control._
 import scalafx.scene.text.{Font, TextAlignment}
 import scala.collection.mutable.Buffer
 
+
 case class Result(card: Card) // case class for returning selected card
 
 /** Dialog object for listing cards when adding a card from archive or template

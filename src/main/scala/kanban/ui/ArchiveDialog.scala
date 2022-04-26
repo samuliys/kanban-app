@@ -1,7 +1,7 @@
 package kanban.ui
 
 import kanban._
-import kanban.Main.drawAlert
+import kanban.ui.Main.drawAlert
 import scalafx.Includes._
 import scalafx.collections.ObservableBuffer
 import scalafx.geometry.Pos._
@@ -9,8 +9,8 @@ import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control._
 import scalafx.scene.layout._
 import scalafx.scene.text.{Font, TextAlignment}
-
 import scala.collection.mutable.Buffer
+
 
 /** Dialog object for managing archive and templates. */
 object ArchiveDialog {

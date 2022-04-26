@@ -4,6 +4,7 @@ import scalafx.scene.paint.Color
 import java.time.LocalDate
 import scala.collection.mutable.Buffer
 
+
 // Premade templates for showcase, the user can create their own
 object Template1 extends Card("Example 1", Color.Black, Color.LightBlue, Buffer[String](), new Checklist, Some(new Deadline(LocalDate.of(2022, 4, 27)))) {
   getChecklist.addTask("Create a new list")

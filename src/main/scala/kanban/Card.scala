@@ -4,6 +4,7 @@ import scalafx.scene.paint.Color
 import java.io.File
 import scala.collection.mutable.Buffer
 
+
 /** Models a kanban board. A board has lists that have cards inside them.
  * Boards can also have background images and each of them has their own archive.
  *

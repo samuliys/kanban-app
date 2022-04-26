@@ -1,7 +1,7 @@
 package kanban.ui
 
 import kanban._
-import kanban.Main.drawAlert
+import kanban.ui.Main.drawAlert
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.scene.control.ButtonBar.ButtonData
@@ -10,9 +10,8 @@ import scalafx.scene.layout._
 import scalafx.scene.paint.Color
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
-import settings._
-
 import java.io.File
+
 
 /** Dialog object for creating and editing boards. */
 object BoardDialog {

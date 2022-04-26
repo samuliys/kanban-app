@@ -1,5 +1,6 @@
 package kanban.ui
 
+import kanban._
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.collections.ObservableBuffer
@@ -10,14 +11,13 @@ import scalafx.scene.control._
 import scalafx.scene.layout._
 import scalafx.scene.paint.Color
 import scalafx.stage.FileChooser
-import settings._
-import kanban._
+import scala.collection.mutable.Buffer
+import scala.util.{Failure, Success, Try}
 import java.awt.Desktop
 import java.io.File
 import java.net.{URI, URL}
 import java.time.LocalDate
-import scala.collection.mutable.Buffer
-import scala.util.{Failure, Success, Try}
+
 
 /** Dialog object for creating and editing cards. */
 object CardDialog {

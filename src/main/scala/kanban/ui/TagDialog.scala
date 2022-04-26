@@ -9,6 +9,7 @@ import scalafx.scene.control._
 import scalafx.scene.layout._
 import scalafx.scene.paint.Color
 
+
 /** Dialog object for managing tags. */
 object TagDialog {
 

@@ -3,6 +3,7 @@ package kanban
 import scalafx.scene.paint.Color
 import scala.collection.mutable.Buffer
 
+
 /** Models a checklist consisting of tasks that can either be completed or not.
  *
  * @param tasks tasks of the checklist, have a boolean state and text detailing the task

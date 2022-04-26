@@ -1,6 +1,6 @@
 package kanban.ui
 
-import javafx.beans.value.ObservableValue
+import kanban._
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
@@ -15,13 +15,13 @@ import scalafx.scene.layout._
 import scalafx.scene.paint.Color
 import scalafx.scene.shape.StrokeType
 import scalafx.scene.text._
-import settings._
-import kanban._
+import scala.collection.mutable.{Buffer, Map}
+import scala.util.{Failure, Success, Try}
+import javafx.beans.value.ObservableValue
 import java.awt.Desktop
 import java.io.File
 import java.net.URI
-import scala.collection.mutable.{Buffer, Map}
-import scala.util.{Failure, Success, Try}
+
 
 /** Main object handling the ScalaFX GUI. */
 object Main extends JFXApp {

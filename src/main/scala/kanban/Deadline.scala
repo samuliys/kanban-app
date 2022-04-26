@@ -1,10 +1,10 @@
 package kanban
 
 import scalafx.scene.paint.Color
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+
 
 /** Models a deadline, a card feature. Deadline has a due date and has a boolean state.
  *

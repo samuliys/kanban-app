@@ -155,7 +155,7 @@ class FileHandler {
     val fileChooser = new FileChooser {
       extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json")) // only json files will be created
     }
-    var selectedFile = fileChooser.showSaveDialog(Main.getStage)
+    var selectedFile = fileChooser.showSaveDialog(ui.Main.getStage)
     if (selectedFile != null) { // make sure a save file was selected before using it
       val save = Try {
         // on some devices .json will not be automatically added to the file name despite extension filter
@@ -193,7 +193,7 @@ class FileHandler {
       extensionFilters.add(new ExtensionFilter("JSON Files (*.json)", "*.json")) // allow only selecting json files
     }
 
-    val selectedFile = fileChooser.showOpenDialog(Main.getStage)
+    val selectedFile = fileChooser.showOpenDialog(ui.Main.getStage)
     if (selectedFile != null) { // make sure a file was selected
       val sourceData = Try { // handle case where file can't be read
         Source.fromFile(selectedFile)

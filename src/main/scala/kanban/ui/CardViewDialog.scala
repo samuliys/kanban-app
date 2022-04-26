@@ -8,9 +8,8 @@ import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control._
 import scalafx.scene.layout._
 import scalafx.scene.text._
-import settings._
-
 import java.awt.Desktop
+
 
 /** Dialog object for viewing a single card. */
 object CardViewDialog {
