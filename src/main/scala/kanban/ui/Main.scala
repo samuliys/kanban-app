@@ -48,20 +48,12 @@ object Main extends JFXApp {
 
   private val currentFilter = Buffer[String]() // Buffer for tracking the tags that are currently used for filtering
 
-
-
-  // Create first board and list on startup
-  kanbanApp.createBoard("board1")
-  kanbanApp.getBoards.head.addColumn("list 1", Color.Black)
-  kanbanApp.getBoards.head.getColumns.head.addCard(new Card("card1", Color.LightBlue))
-
   // Options for keeping track of activve and/or selected card/column
   private var activeCard: Option[Card] = None
   private var activeColumn: Option[Column] = None
   private var columnMove: Option[Column] = None
 
-  //private var activeBoard = kanbanApp.getBoards.head // not option as one will always have to be selected
-  private var activeBoard = kanbanApp.getBoards.head // not option as one will always have to be selected
+  private var activeBoard = new Board // not option as one will always have to be selected
 
   private var boardBackground: Background = getBoardBackground(activeBoard) // store the current background so no need to load in every update
 
@@ -956,11 +948,11 @@ object Main extends JFXApp {
   stage.centerOnScreen() // center window
 
   // Show menu window on startup
-  /*  StartupWindow.showWindow()
+  StartupWindow.showWindow()
 
-    // Get the kanban session user chose and update GUI
-    kanbanApp = StartupWindow.getKanban
-    fullUpdate()*/
+  // Get the kanban session user chose and update GUI
+  kanbanApp = StartupWindow.getKanban
+  fullUpdate()
 
   // Listen to changes made to the height and width of the window
   // so that GUI components that are based on the size of the window are updated accordingly
