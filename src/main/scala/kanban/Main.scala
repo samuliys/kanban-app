@@ -449,6 +449,7 @@ object Main extends JFXApp {
       minWidth = 110
 
       items += new MenuItem("From Archive") { // option for bringing a card back from archive
+        disable = board.getArchive.getCards.isEmpty
         onAction = (event) => {
           CardListDialog.reset(kanbanApp, board, column)
           CardListDialog.showDialog()
@@ -457,6 +458,7 @@ object Main extends JFXApp {
       }
 
       items += new MenuItem("From Template") { // or create card using template
+        disable = kanbanApp.getTemplates.isEmpty
         onAction = (event) => {
           CardListDialog.reset(kanbanApp, board, column, new Card, 2)
           CardListDialog.showDialog()

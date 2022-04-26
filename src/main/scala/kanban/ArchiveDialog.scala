@@ -175,8 +175,16 @@ object ArchiveDialog {
    * @return VBox component with components needed to show cards */
   private def getListCards(cards: Buffer[Card]): VBox = {
     new VBox(5) {
-      for (card <- cards) {
-        children += drawCard(card) // use method to form one card components
+      alignment = Center
+      if (cards.nonEmpty) {
+        for (card <- cards) {
+          children += drawCard(card) // use method to form one card components
+        }
+      } else {
+        val labelText = if (archiveMode) "                Archive is Empty" else "                   No Templates"
+        children += new Label(labelText) {
+          font = Font.font("arial", 20)
+        }
       }
     }
   }
@@ -246,16 +254,13 @@ object ArchiveDialog {
       selectedCards.clear() // no cards are selected at the beginning
 
       if (archive.getCards.isEmpty) { // in case no cards are in the archive
-        scroll.content = new Label("              Archive is empty") {
-          font = Font.font("arial", 20)
-        }
         selectAllButton.disable = true // disable buttons related to
         listSelection.disable = true
       } else {
-        scroll.content = getListCards(archive.getCards) // set correct cards to be shown
         selectAllButton.disable = false
         listSelection.disable = false
       }
+      scroll.content = getListCards(archive.getCards) // set correct cards to be shown
 
       listSelection.items = ObservableBuffer(board.getColumns.map(_.getName).toList)
       listSelection.getSelectionModel.selectFirst()
@@ -267,22 +272,20 @@ object ArchiveDialog {
       archiveControls.visible = false // only shown in archive mode
 
       if (kanbanapp.getTemplates.isEmpty) {
-        scroll.content = new Label("             No Templates") {
-          font = Font.font("arial", 20)
-        }
         selectAllButton.disable = true
         listSelection.disable = true
       } else {
-        scroll.content = getListCards(kanbanapp.getTemplates)
         selectAllButton.disable = false
         listSelection.disable = false
       }
+      scroll.content = getListCards(kanbanapp.getTemplates)
     }
     // These buttons are disabled by default
     unSelectButton.disable = true
     deleteSelectedButton.disable = true
     returnCardButton.disable = true
   }
+
   /** Updates the view and state of dialog buttons after user action */
   private def update(): Unit = {
     if (archiveMode) { // handle both dialog modes separately

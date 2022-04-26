@@ -116,7 +116,7 @@ object CardListDialog {
           children += drawCard(card) // create components for each card
         }
       } else { // if no cards, show text
-        children += new Label("                  No Cards") {
+        children += new Label("                       No Cards") {
           font = Font.font("arial", 20)
         }
       }
@@ -146,7 +146,7 @@ object CardListDialog {
     } else if (mode == 2) { // ...template management button
       children += new Button("Manage Templates") {
         onAction = (event) => {
-          ArchiveDialog.reset(kanban, selectedBoard)
+          ArchiveDialog.reset(kanban, selectedBoard, false)
           ArchiveDialog.showDialog()
           scroll.content = cardListCards // update cards
         }

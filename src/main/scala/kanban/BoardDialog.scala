@@ -109,7 +109,7 @@ object BoardDialog {
   }
 
   private val drawContents = new VBox(10) {
-    minWidth = 400
+    minWidth = 500
     children += new HBox(10) {
       children += promptLabel
       children += boardName
@@ -179,6 +179,7 @@ object BoardDialog {
       separator.visible = false
       deletePane.children = new Pane // when crating new board hide delete button
       radio1.selected = true // color mode by defaul
+      chooseImageBtn.disable = true
       boardColor.value = DefaultBoardColor // white by default
       boardColor.disable = false
       fileLabel.text = ""
