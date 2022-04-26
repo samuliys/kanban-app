@@ -1,5 +1,0 @@
-package kanban
-
-class Dialog {
-
-}
