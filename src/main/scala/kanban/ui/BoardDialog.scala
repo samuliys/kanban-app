@@ -179,7 +179,7 @@ object BoardDialog {
       boardName.text = ""
       separator.visible = false
       deletePane.children = new Pane // when crating new board hide delete button
-      radio1.selected = true // color mode by defaul
+      radio1.selected = true // color mode by default
       chooseImageBtn.disable = true
       boardColor.value = DefaultBoardColor // white by default
       boardColor.disable = false

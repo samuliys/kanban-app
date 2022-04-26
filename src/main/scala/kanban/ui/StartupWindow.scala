@@ -103,6 +103,12 @@ object StartupWindow {
         onAction = (event) => sys.exit(0)
       }
     }
+    children += new HBox(20) {
+      alignment = CenterLeft
+      children += pane
+      children += new Label("Samuli Yli-Salomäki")
+      children += new Label("909509")
+    }
   }
 
   startupWindow.scene = new Scene(root)

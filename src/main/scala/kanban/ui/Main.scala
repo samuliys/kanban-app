@@ -48,7 +48,7 @@ object Main extends JFXApp {
 
   private val currentFilter = Buffer[String]() // Buffer for tracking the tags that are currently used for filtering
 
-  // Options for keeping track of activve and/or selected card/column
+  // Options for keeping track of active and/or selected card/column
   private var activeCard: Option[Card] = None
   private var activeColumn: Option[Column] = None
   private var columnMove: Option[Column] = None
@@ -138,7 +138,7 @@ object Main extends JFXApp {
    * @return Button component with logic needed to archive a card */
   private def drawCardArchive(board: Board, column: Column, card: Card): Button = {
     new Button("Archive") {
-      onAction = (event) => { // save card to archive and delele it from board
+      onAction = (event) => { // save card to archive and delete it from board
         board.getArchive.addCard(card)
         column.deleteCard(card)
         activeCard = None
@@ -183,7 +183,7 @@ object Main extends JFXApp {
    * @param card     the card whose checklist will be displayed
    * @param isActive whether the card is set to active
    * @return HBox component for basic checklist status and a possible second HBox component
-   *         with more delaied view of the checklist task that is shown when card is active */
+   *         with more detailed view of the checklist task that is shown when card is active */
   private def drawCardChecklist(card: Card, isActive: Boolean): (HBox, Option[HBox]) = {
     val box1 = new HBox(10) { // first HBox used to display overall checklist progress status
       alignment = Center
@@ -776,7 +776,7 @@ object Main extends JFXApp {
     if (kanbanApp.getTags.isEmpty) getEmptyFilterItems else items
   }
 
-  /** Returns text displayig active filters
+  /** Returns text displaying active filters
    *
    * @return string describing active filters */
   private def getFilterText: String = {
@@ -854,7 +854,7 @@ object Main extends JFXApp {
     val amount = board.getColumns.size
     // based on currently existing lists, the more there are, the smaller it needs to be
     (stage.width() - amount * ColumnWidth - amount * ColumnGapSize - 20).toInt max 200
-    // 200 as even if the screen is filled there still needs to be a pane needed to move the columsn around
+    // 200 as even if the screen is filled there still needs to be a pane needed to move the column around
   }
 
   /** Forms HBox component used to display a board

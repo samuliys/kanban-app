@@ -20,7 +20,7 @@ class Checklist(private var tasks: Buffer[(Boolean, String)] = Buffer[(Boolean, 
   /** Adds a task to the checklist
    *
    * @param task text describing task */
-  def addTask(task: String): Unit = tasks.append((false, task)) // new task is false at the beginnig
+  def addTask(task: String): Unit = tasks.append((false, task)) // new task is false at the beginning
 
   /** Removes a task from the checklist
    *

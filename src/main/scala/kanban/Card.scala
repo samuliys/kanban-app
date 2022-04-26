@@ -61,7 +61,7 @@ class Card(private var text: String = "",
     if (tags.contains(tag)) tags -= tag
   }
 
-  /** Edit all card information based on given porameters
+  /** Edit all card information based on given parameters
    *
    * @param newText        new text on the card
    * @param newTextColor   new color of text

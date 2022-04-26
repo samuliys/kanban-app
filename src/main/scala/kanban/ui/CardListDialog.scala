@@ -96,7 +96,7 @@ object CardListDialog {
         case None =>
       }
 
-      onMouseClicked = (event) => { // toggle card selectino state
+      onMouseClicked = (event) => { // toggle card selection state
         if (selectedCard == card) {
           selectedCard = noCard
         } else {
