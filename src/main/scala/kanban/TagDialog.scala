@@ -3,6 +3,7 @@ package kanban
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.collections.ObservableBuffer
+import scalafx.geometry.Pos.CenterLeft
 import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.layout._
 import scalafx.scene.control._
@@ -22,17 +23,22 @@ object TagDialog {
 
   private var kanbanapp = new Kanban // store current kanban session to variable
 
+  private val tagLabelWidth = 80
+  private val tagEntryWidth = 200
+
   private val okButtonType = new ButtonType("OK", ButtonData.OKDone)
   private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   dialog.dialogPane().buttonTypes = Seq(ButtonType.OK) // add button to dialog
 
   private val tagText = new TextField { // text field for entering tag name
+    minWidth = tagEntryWidth
     promptText = "Tag Name"
   }
 
   private val addTagButton = new Button("Add Tag") { // button for creating a new tag
     disable = true
+    minWidth = tagLabelWidth
     onAction = (event) => {
       kanbanapp.addTag(tagText.text()) // add the new tag
       tagText.text = ""
@@ -52,6 +58,7 @@ object TagDialog {
 
   private val tagRemoveMenu: ComboBox[String] = new ComboBox(getTagList) { // combobox for selecting a tag to be remove
     promptText = "Select Tag to Remove"
+    minWidth = tagEntryWidth
     onAction = (event) => {
       deleteTagButton.disable = false
     }
@@ -59,6 +66,7 @@ object TagDialog {
 
   private val deleteTagButton = new Button("Delete Tag") { // button for deleting a selected tag
     disable = true
+    minWidth = tagLabelWidth
     onAction = (event) => {
       kanbanapp.removeTag(tagRemoveMenu.value())
       tagRemoveMenu.items = ObservableBuffer(getTagList) // update list of tags
@@ -77,13 +85,17 @@ object TagDialog {
   private def drawContents: VBox = new VBox(10) {
     minWidth = 500
     children += new HBox(10) {
-      children += new Label("New Tag:")
+      children += new Label("New Tag") {
+        minWidth = tagLabelWidth
+      }
       children += tagText
       children += addTagButton
       children += errorLabel
     }
-    children += new HBox(5) {
-      children += new Label("Remove Tag:")
+    children += new HBox(10) {
+      children += new Label("Remove Tag") {
+        minWidth = tagLabelWidth
+      }
       children += tagRemoveMenu
       children += deleteTagButton
     }
@@ -93,7 +105,7 @@ object TagDialog {
     if (newValue == "") {
       errorLabel.text = "Tag name can't be empty"
       addTagButton.disable = true
-    } else if (newValue.length > 15) { // don't allow too long tag names
+    } else if (newValue.length > 20) { // don't allow too long tag names
       errorLabel.text = "Tag name too long"
       addTagButton.disable = true
     } else if (getTagList.contains(newValue)) { // tag names must be unique
