@@ -39,7 +39,7 @@ class Column(private var name: String = "",
     cards += new Card(text, textColor, borderColor, tags, checklist, deadline, file, subCard, url)
   }
 
-  /** Adds an existing card to specific location on the Columnj
+  /** Adds an existing card to specific location on the Column
    *
    * @param card  card to be added to the column
    * @param index index of target location */

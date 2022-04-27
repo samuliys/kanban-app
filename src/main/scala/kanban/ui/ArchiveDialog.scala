@@ -36,7 +36,7 @@ object ArchiveDialog {
   dialog.dialogPane().buttonTypes = Seq(ButtonType.OK) // add button to dialog
 
   private val selectAllButton = new Button("Select All") {
-    onAction = (event) => { // sets all cards as selcted
+    onAction = (event) => { // sets all cards as selected
       selectedCards.clear()
       if (archiveMode) { // depending on current mode dialog deals with either archive or templates
         archive.getCards.foreach(selectedCards.append(_))
@@ -48,7 +48,7 @@ object ArchiveDialog {
   }
 
   private val unSelectButton = new Button("Remove Selection") {
-    onAction = (event) => { // unselecs all possibly selected cards
+    onAction = (event) => { // unselects all possibly selected cards
       selectedCards.clear()
       update()
     }
@@ -72,7 +72,7 @@ object ArchiveDialog {
    * @return VBox component with all components needed to display a card */
   private def drawCard(card: Card): VBox = {
     new VBox(4) {
-      if (selectedCards.contains(card)) { // if card is selcted special border
+      if (selectedCards.contains(card)) { // if card is selected special border
         border = new Border(new BorderStroke(card.getBorderColor, BorderStrokeStyle.Dotted, new CornerRadii(2), new BorderWidths(6)))
       } else {
         border = new Border(new BorderStroke(card.getBorderColor, BorderStrokeStyle.Solid, new CornerRadii(2), new BorderWidths(6)))
@@ -135,7 +135,7 @@ object ArchiveDialog {
         case None =>
       }
 
-      if (selectedCards.contains(card)) { // display edit and delele buttons for selected cards
+      if (selectedCards.contains(card)) { // display edit and delete buttons for selected cards
         children += new HBox(4) {
           alignment = Center
           children += new Button("Edit") {
@@ -160,7 +160,7 @@ object ArchiveDialog {
         }
       }
 
-      onMouseClicked = (event) => { // when cliked, toggle selection
+      onMouseClicked = (event) => { // when clicked, toggle selection
         if (selectedCards.contains(card)) {
           selectedCards -= card
         } else {

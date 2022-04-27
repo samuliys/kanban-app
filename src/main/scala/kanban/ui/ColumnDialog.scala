@@ -35,7 +35,7 @@ object ColumnDialog {
     minWidth = 200
   }
 
-  private val columnColor = new ColorPicker(Color.Black) { // coloc picker for choosing border color
+  private val columnColor = new ColorPicker(Color.Black) { // color picker for choosing border color
     promptText = "Color"
   }
 

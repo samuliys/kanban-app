@@ -62,6 +62,10 @@ object CardDialog {
     minWidth = 420
   }
 
+  private val textErrorLabel = new Label { // label for notifying user of empty or too long text
+    textFill = Color.Red
+  }
+
   private val borderColor = new ColorPicker(Color.Black) { // color picker for border color
     promptText = "Border Color"
   }
@@ -72,7 +76,7 @@ object CardDialog {
 
   /** Creates MenuItem components used for listing tags for removal
    *
-   * @return MenuItem omponents needed to list tags for removal */
+   * @return MenuItem Components needed to list tags for removal */
   private def drawRemoveTagMenuItems: Buffer[MenuItem] = {
     val items = Buffer[MenuItem]()
     for (tag <- cardTags) {
@@ -92,7 +96,7 @@ object CardDialog {
 
   /** Creates MenuItem components used for listing tags to add them to cards
    *
-   * @return MenuItem omponents needed to list tags for adding to card */
+   * @return MenuItem Components needed to list tags for adding to card */
   private def drawAddTagMenuItems: Buffer[MenuItem] = {
     val items = Buffer[MenuItem]()
     for (tag <- kanbanapp.getTags.filterNot(cardTags.contains(_))) { // show only tags the card does not have
@@ -315,7 +319,7 @@ object CardDialog {
             new URL(enteredUrl)
           }
           validateUrl match {
-            case Failure(exception) => { // if not valid, infor user
+            case Failure(exception) => { // if not valid, inform user
               new Alert(AlertType.Information) {
                 initOwner(Main.getStage)
                 title = "Invalid URL"
@@ -363,7 +367,7 @@ object CardDialog {
     }
   }
 
-  private val urlLabel = new Label("URL: ") // label for dispalying url informatin
+  private val urlLabel = new Label("URL: ") // label for displaying url information
 
   private val toTemplateButton = new Button("Make into a template") { // button for turning a card into a template
     onAction = (event) => {
@@ -371,7 +375,7 @@ object CardDialog {
       new Alert(AlertType.Information) { // show success message
         initOwner(Main.getStage)
         title = "Template"
-        headerText = "Template Created Succesfully"
+        headerText = "Template Created Successfully"
         contentText = "Click 'Templates' on Toolbar to Manage"
       }.showAndWait()
     }
@@ -423,7 +427,7 @@ object CardDialog {
     selectedCard = oldCard
   }
 
-  private val resetAllButton = new Button("Reset All") { // button for reseting card to default values
+  private val resetAllButton = new Button("Reset All") { // button for resetting card to default values
     onAction = (event) => {
       cardReset()
     }
@@ -444,11 +448,12 @@ object CardDialog {
         minWidth = headlineWidth
       }
       children += cardText
+      children += textErrorLabel
     }
     children += new Separator
     children += new HBox(10) {
       alignment = CenterLeft
-      children += new Label("Appereance") { // card colors segment
+      children += new Label("Appearance") { // card colors segment
         font = CardTextFont
         minWidth = headlineWidth
       }
@@ -569,7 +574,16 @@ object CardDialog {
   private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   cardText.text.onChange { (_, _, newValue) => // card text can't be empty
-    okButton.disable = newValue.trim().isEmpty
+    if (newValue.trim().isEmpty) {
+      okButton.disable = true
+      textErrorLabel.text = "Can't be empty"
+    } else if (newValue.length > 1000) {
+      okButton.disable = true
+      textErrorLabel.text = "Text Too Long"
+    } else {
+      okButton.disable = false
+      textErrorLabel.text = ""
+    }
     toTemplateButton.disable = newValue.trim().isEmpty
   }
 
@@ -586,21 +600,22 @@ object CardDialog {
    * @param isTemplate whether the dialog will be used edit a template
    */
   def reset(kanban: Kanban, column: Column, card: Card, isNew: Boolean, isTemplate: Boolean = false): Unit = {
-    // Set parameteres to variables
+    // Set parameters to variables
     kanbanapp = kanban
     selectedColumn = column
     selectedCard = card
     newCard = isNew
     template = isTemplate
 
-    checklist = new Checklist // blank new checkist
+    checklist = new Checklist // blank new checklist
     checklist.resetTasks()
 
     taskText.text = "" // reset text fields
+    textErrorLabel.text = ""
     errorLabel.text = ""
     okButton.disable = isNew // ok button will be disabled as new cards don't have any text
 
-    selectedFile = card.getFile // get information about card attachnents
+    selectedFile = card.getFile // get information about card attachments
     selectedUrl = card.getUrl
     selectedSubcard = card.getSubcard
 
@@ -608,6 +623,7 @@ object CardDialog {
       dialog.title = "Kanban - New Card"
       dialog.headerText = "Add New Card"
       cardText.text = ""
+      textErrorLabel.text = ""
       borderColor.value = DefaultColor
       textColor.value = DefaultColor
 
@@ -626,7 +642,7 @@ object CardDialog {
 
       card.getFile match {
         case Some(file) => {
-          if (file.canRead) { // nake sure file can still be found
+          if (file.canRead) { // make sure file can still be found
             selectedFile = Some(file)
           } else {
             selectedFile = None
@@ -637,7 +653,7 @@ object CardDialog {
     }
     taskRemoveMenu.items = ObservableBuffer(getTaskList) // update task list
 
-    selectedFile match { // hamdle file attachment
+    selectedFile match { // handle file attachment
       case Some(file) => {
         openFile.disable = false
         removeFileButton.disable = false
@@ -722,7 +738,8 @@ object CardDialog {
       None
     }
   }
-  /** Updates view and dialog compoenents */
+
+  /** Updates view and dialog components */
   private def update(): Unit = dialog.dialogPane().content = drawContents
 
   dialog.resultConverter = dialogButton => { // create new card or edit old one when user clicks ok button

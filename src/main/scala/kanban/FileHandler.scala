@@ -172,9 +172,9 @@ class FileHandler {
       save match { // display error message if something went wrong while saving
         case Failure(exception) => new Alert(AlertType.Warning, "There Was an Error Saving to File").showAndWait()
         case Success(value) => {
-          val alert = new Alert(AlertType.Information, "File Saved Succesfully") {
+          val alert = new Alert(AlertType.Information, "File Saved Successfully") {
             title = "Save to File"
-            headerText = "File Saved Succesfully"
+            headerText = "File Saved Successfully"
           }
           alert.showAndWait()
         }

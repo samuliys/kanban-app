@@ -16,7 +16,7 @@ package object ui {
   val ColumnWidth = 330
   val ColumnGapSize = 20
 
-  // Defualt fonts
+  // Default fonts
   val DefaultFont = Font.font("arial", 13)
   val CardTextFont = Font.font("arial", 15)
 
