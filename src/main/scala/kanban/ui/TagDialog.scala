@@ -70,6 +70,7 @@ object TagDialog {
     minWidth = tagLabelWidth
     onAction = (event) => {
       kanbanapp.removeTag(tagRemoveMenu.value())
+      Main.checkActiveFilter(tagRemoveMenu.value())
       tagRemoveMenu.items = ObservableBuffer(getTagList) // update list of tags
       tagRemoveMenu.promptText = "Select Tag to Remove"
       disable = true

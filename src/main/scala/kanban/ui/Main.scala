@@ -62,6 +62,13 @@ object Main extends JFXApp {
    * @return currently active stage */
   def getStage: PrimaryStage = stage
 
+  /** Makes sure that the active filter does not contain a just deleted tag, if so remove it */
+  def checkActiveFilter(tag: String): Unit = {
+    if (currentFilter.contains(tag)) {
+      currentFilter -= tag
+    }
+  }
+
   /** Creates a confirmation alert to ask for confirmation before doing a task
    *
    * @param alertTitle title of the alert window
@@ -765,7 +772,7 @@ object Main extends JFXApp {
           activeCard = None
           activeColumn = None
           if (currentFilter.contains(tag)) {
-            currentFilter.remove(currentFilter.indexOf(tag))
+            currentFilter -= tag
           } else {
             currentFilter += tag
           }
