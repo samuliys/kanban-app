@@ -92,8 +92,8 @@ object TagDialog {
       }
       children += tagText
       children += addTagButton
-      children += errorLabel
     }
+    children += errorLabel
     children += new HBox(10) {
       children += new Label("Remove Tag") {
         minWidth = tagLabelWidth
