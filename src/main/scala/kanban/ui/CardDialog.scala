@@ -62,6 +62,10 @@ object CardDialog {
     minWidth = 420
   }
 
+  private val textErrorLabel = new Label { // label for notifying user of empty or too long text
+    textFill = Color.Red
+  }
+
   private val borderColor = new ColorPicker(Color.Black) { // color picker for border color
     promptText = "Border Color"
   }
@@ -444,6 +448,7 @@ object CardDialog {
         minWidth = headlineWidth
       }
       children += cardText
+      children += textErrorLabel
     }
     children += new Separator
     children += new HBox(10) {
@@ -569,7 +574,16 @@ object CardDialog {
   private val okButton = dialog.dialogPane().lookupButton(okButtonType)
 
   cardText.text.onChange { (_, _, newValue) => // card text can't be empty
-    okButton.disable = newValue.trim().isEmpty
+    if (newValue.trim().isEmpty) {
+      okButton.disable = true
+      textErrorLabel.text = "Can't be empty"
+    } else if (newValue.length > 1000) {
+      okButton.disable = true
+      textErrorLabel.text = "Text Too Long"
+    } else {
+      okButton.disable = false
+      textErrorLabel.text = ""
+    }
     toTemplateButton.disable = newValue.trim().isEmpty
   }
 
@@ -597,6 +611,7 @@ object CardDialog {
     checklist.resetTasks()
 
     taskText.text = "" // reset text fields
+    textErrorLabel.text = ""
     errorLabel.text = ""
     okButton.disable = isNew // ok button will be disabled as new cards don't have any text
 
@@ -608,6 +623,7 @@ object CardDialog {
       dialog.title = "Kanban - New Card"
       dialog.headerText = "Add New Card"
       cardText.text = ""
+      textErrorLabel.text = ""
       borderColor.value = DefaultColor
       textColor.value = DefaultColor
 
@@ -722,6 +738,7 @@ object CardDialog {
       None
     }
   }
+
   /** Updates view and dialog components */
   private def update(): Unit = dialog.dialogPane().content = drawContents
 
